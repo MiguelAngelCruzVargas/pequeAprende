@@ -163,7 +163,7 @@ function App() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 1.05, y: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.15 }}
             className="w-full flex-1 flex flex-col min-h-0"
           >
             {screen === 'menu' ? (
@@ -203,11 +203,11 @@ function App() {
                         {menuItems.filter(m => cat.name === 'Aprender con IA' ? m.category === 'Aprender' : m.category === 'Habla').map((item, i) => (
                           <motion.button
                             key={item.id}
-                            initial={{ opacity: 0, scale: 0.8 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: (catIdx * 0.1) + (i * 0.05), type: 'spring', bounce: 0.5 }}
-                            whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 2 : -2, y: -4 }}
-                            whileTap={{ scale: 0.92, y: 12 }}
+                            transition={{ delay: i * 0.03, duration: 0.3 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => handleSetScreen(item.id as GameScreen)}
                             className="group relative aspect-[4/5] sm:aspect-square w-full rounded-[2.5rem] sm:rounded-[3rem] p-0 overflow-hidden outline-none"
                           >
@@ -228,9 +228,9 @@ function App() {
 
                               <div className="flex-1 flex items-center justify-center w-full">
                                 <motion.div
-                                  className="text-[4.5rem] sm:text-7xl lg:text-8xl filter drop-shadow-[0_15px_15px_rgba(0,0,0,0.3)] will-change-transform"
-                                  whileHover={{ y: -5, scale: 1.15 }}
-                                  transition={{ type: "spring", stiffness: 300 }}
+                                  className="text-[4.5rem] sm:text-7xl lg:text-8xl drop-shadow-md"
+                                  whileHover={{ y: -5, scale: 1.1 }}
+                                  transition={{ duration: 0.2 }}
                                 >
                                   {item.emoji}
                                 </motion.div>
