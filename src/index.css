@@ -19,8 +19,14 @@ body,
   background-size: 400px, 100% 100%;
   background-repeat: repeat, no-repeat;
   overscroll-behavior: none;
-
   -webkit-overflow-scrolling: touch;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .glass-card {
