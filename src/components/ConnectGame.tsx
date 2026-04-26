@@ -198,13 +198,8 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     updateMousePosFromClient(clientX, clientY);
   };
 
-  const handlePointerDown = (id: string, side: 'left' | 'right', e: React.PointerEvent) => {
+  const handleMouseDown = (id: string, side: 'left' | 'right', e: React.MouseEvent) => {
     e.preventDefault();
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      // Some tablet browsers can throw here; drag still works via window listeners.
-    }
     handleDragStart(id, side, e.clientX, e.clientY);
   };
 
@@ -269,16 +264,12 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   };
 
   useEffect(() => {
-    const handlePointerMove = (e: PointerEvent) => {
+    const handleMouseMove = (e: MouseEvent) => {
       if (draggingFrom) updateMousePosFromClient(e.clientX, e.clientY);
     };
 
-    const handlePointerUp = (e: PointerEvent) => {
+    const handleMouseUp = (e: MouseEvent) => {
       completeDragAtPoint(e.clientX, e.clientY);
-    };
-
-    const handlePointerCancel = () => {
-      setDraggingFrom(null);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -304,16 +295,14 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
       setDraggingFrom(null);
     };
 
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerCancel);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd, { passive: false });
     window.addEventListener('touchcancel', handleTouchCancel, { passive: false });
     return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerCancel);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('touchcancel', handleTouchCancel);
@@ -549,7 +538,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   key={item.id}
                   ref={el => leftRefs.current[item.id] = el}
                   data-left-id={item.id}
-                  onPointerDown={(e) => handlePointerDown(item.id, 'left', e)}
+                  onMouseDown={(e) => handleMouseDown(item.id, 'left', e)}
                   onTouchStart={(e) => handleTouchStart(item.id, 'left', e)}
                   animate={isFlashing
                     ? { scale: [1, 1.3, 0.95, 1.1, 1], rotate: [0, -5, 5, -3, 0] }
@@ -622,7 +611,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   key={item.id}
                   ref={el => rightRefs.current[item.id] = el}
                   data-right-id={item.id}
-                  onPointerDown={(e) => handlePointerDown(item.id, 'right', e)}
+                  onMouseDown={(e) => handleMouseDown(item.id, 'right', e)}
                   onTouchStart={(e) => handleTouchStart(item.id, 'right', e)}
                   animate={isFlashing
                     ? { scale: [1, 1.3, 0.95, 1.1, 1], rotate: [0, 5, -5, 3, 0] }
