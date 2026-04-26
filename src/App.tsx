@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameScreen } from './types';
 import { stopSpeaking, resumeSpeaking } from './lib/speech';
@@ -43,6 +43,42 @@ const menuItems = [
   { id: 'connect', label: 'Conecta', emoji: '🔗', gradient: 'from-indigo-400 to-purple-600', shadow: 'shadow-[0_10px_0_#4338CA]', activeShadow: 'active:shadow-[0_0px_0_#4338CA]', category: 'Aprender' },
 ];
 
+const APP_STORAGE_KEY = 'peque_app_state_v1';
+const ALL_SCREENS: GameScreen[] = [
+  'welcome', 'menu', 'colors', 'numbers', 'vowels', 'animals', 'reasoning',
+  'shapes', 'matching', 'nameit', 'repeat', 'soundguess', 'coloring', 'bubbles', 'connect',
+];
+
+const GAME_IDS = new Set(menuItems.map(item => item.id));
+
+function isGameScreen(value: unknown): value is GameScreen {
+  return typeof value === 'string' && ALL_SCREENS.includes(value as GameScreen);
+}
+
+function loadPersistedAppState(): { screen: GameScreen; userName: string; visitedGames: string[] } {
+  try {
+    const raw = localStorage.getItem(APP_STORAGE_KEY);
+    if (!raw) return { screen: 'welcome', userName: '', visitedGames: [] };
+    const parsed = JSON.parse(raw) as {
+      screen?: unknown;
+      userName?: unknown;
+      visitedGames?: unknown;
+    };
+
+    const rawScreen = isGameScreen(parsed.screen) ? parsed.screen : 'welcome';
+    const userName = typeof parsed.userName === 'string' ? parsed.userName.slice(0, 60) : '';
+    // If a name already exists, skip welcome on next app launch.
+    const screen: GameScreen = userName.trim() ? (rawScreen === 'welcome' ? 'menu' : rawScreen) : rawScreen;
+    const visitedGames = Array.isArray(parsed.visitedGames)
+      ? parsed.visitedGames.filter((id): id is string => typeof id === 'string' && GAME_IDS.has(id))
+      : [];
+
+    return { screen, userName, visitedGames };
+  } catch {
+    return { screen: 'welcome', userName: '', visitedGames: [] };
+  }
+}
+
 function AppHeader({ screen, setScreen }: { screen: GameScreen; setScreen: (s: GameScreen) => void }) {
   const { mode, toggleAI } = useAI();
   return (
@@ -70,9 +106,37 @@ function AppHeader({ screen, setScreen }: { screen: GameScreen; setScreen: (s: G
 }
 
 function App() {
-  const [screen, setScreen] = useState<GameScreen>('welcome');
-  const [userName, setUserName] = useState('');
-  const [visitedGames, setVisitedGames] = useState<Set<string>>(new Set());
+  const [screen, setScreen] = useState<GameScreen>(() => loadPersistedAppState().screen);
+  const [userName, setUserName] = useState(() => loadPersistedAppState().userName);
+  const [visitedGames, setVisitedGames] = useState<Set<string>>(
+    () => new Set(loadPersistedAppState().visitedGames),
+  );
+  const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
+
+  useEffect(() => {
+    const onOnline = () => setIsOffline(false);
+    const onOffline = () => setIsOffline(true);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        APP_STORAGE_KEY,
+        JSON.stringify({
+          screen,
+          userName,
+          visitedGames: [...visitedGames],
+          updatedAt: Date.now(),
+        }),
+      );
+    } catch {}
+  }, [screen, userName, visitedGames]);
 
   const handleSetScreen = (newScreen: GameScreen) => {
     stopSpeaking();      // Mata la voz actual + activa flag de silencio
@@ -115,6 +179,11 @@ function App() {
 
   return (
     <div className="fixed inset-0 w-full font-sans overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-green-100 flex flex-col">
+      {isOffline && (
+        <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-full bg-amber-100 text-amber-800 border-2 border-amber-300 shadow-md font-black text-xs sm:text-sm uppercase tracking-wide">
+          Modo sin internet: juegos locales activos
+        </div>
+      )}
 
       {/* CAPA DE FONDO — Usando CSS puro para máximo rendimiento en iPad */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
