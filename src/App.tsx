@@ -114,6 +114,11 @@ function App() {
   const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
 
   useEffect(() => {
+    // Safety net: ensure voice is enabled when the app is opened/reloaded.
+    resumeSpeaking();
+  }, []);
+
+  useEffect(() => {
     const onOnline = () => setIsOffline(false);
     const onOffline = () => setIsOffline(true);
     window.addEventListener('online', onOnline);

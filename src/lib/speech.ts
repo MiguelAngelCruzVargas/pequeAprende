@@ -178,10 +178,9 @@ export const speak = (text: string, cancelPrevious = true): Promise<void> => {
   const cleanText = text.trim();
   if (!cleanText) return Promise.resolve();
 
-  // Si las voces aún no han cargado (iOS primera carga), encolar
+  // Si las voces aún no han cargado (iOS/Safari), intentar fallback inmediato
+  // con la voz por defecto para evitar quedarse en silencio.
   if (!voicesReady) {
-    pendingQueue.push(cleanText);
-    // Forzar un intento adicional de carga
     const voices = synth.getVoices();
     if (voices.length > 0) {
       cachedVoice = pickBestVoice(voices);
@@ -190,7 +189,9 @@ export const speak = (text: string, cancelPrevious = true): Promise<void> => {
       pendingQueue = [];
       return p;
     }
-    return Promise.resolve();
+
+    // Safari puede tardar en exponer voces; hablar de una vez evita "no se oye".
+    return doSpeak(cleanText, cancelPrevious);
   }
 
   return doSpeak(cleanText, cancelPrevious);
