@@ -22,6 +22,7 @@ import RepeatGame from './components/RepeatGame';
 import SoundGuessGame from './components/SoundGuessGame';
 import ColoringGame from './components/ColoringGame';
 import BubblesGame from './components/BubblesGame';
+import ConnectGame from './components/ConnectGame';
 import AIToggle from './components/AIToggle';
 import { AIProvider, useAI } from './lib/aiContext';
 
@@ -39,6 +40,7 @@ const menuItems = [
   { id: 'repeat', label: 'Repite', emoji: '🗣️', gradient: 'from-lime-400 to-green-500', shadow: 'shadow-[0_10px_0_#15803D]', activeShadow: 'active:shadow-[0_0px_0_#15803D]', category: 'Habla' },
   { id: 'soundguess', label: 'Sonidos', emoji: '👂', gradient: 'from-yellow-400 to-orange-500', shadow: 'shadow-[0_10px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]', category: 'Habla' },
   { id: 'bubbles', label: 'Burbujas', emoji: '🫧', gradient: 'from-cyan-300 to-blue-500', shadow: 'shadow-[0_10px_0_#1D4ED8]', activeShadow: 'active:shadow-[0_0px_0_#1D4ED8]', category: 'Habla' },
+  { id: 'connect', label: 'Conecta', emoji: '🔗', gradient: 'from-indigo-400 to-purple-600', shadow: 'shadow-[0_10px_0_#4338CA]', activeShadow: 'active:shadow-[0_0px_0_#4338CA]', category: 'Aprender' },
 ];
 
 function AppHeader({ screen, setScreen }: { screen: GameScreen; setScreen: (s: GameScreen) => void }) {
@@ -101,6 +103,7 @@ function App() {
       case 'soundguess': return <SoundGuessGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('soundguess')} onVisit={() => markAsVisited('soundguess')} />;
       case 'coloring': return <ColoringGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('coloring')} onVisit={() => markAsVisited('coloring')} />;
       case 'bubbles': return <BubblesGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('bubbles')} onVisit={() => markAsVisited('bubbles')} />;
+      case 'connect': return <ConnectGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('connect')} onVisit={() => markAsVisited('connect')} />;
       default: return null;
     }
   };

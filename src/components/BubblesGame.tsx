@@ -125,8 +125,20 @@ export default function BubblesGame({ onBack, isFirstTime, onVisit }: { onBack: 
 
       const isGolden = Math.random() > 0.85; // 15% de probabilidad de ser dorada
       const sound = SOUNDS[Math.floor(Math.random() * SOUNDS.length)];
-      const speed = isGolden ? 4 + Math.random() * 2 : 6 + Math.random() * 6; // Las doradas son más rápidas
+      const speed = isGolden ? 5 + Math.random() * 2 : 8 + Math.random() * 4;
       const id = bubbleIdCounter.current++;
+
+      // Lógica para evitar que se encimen (Overlap)
+      let leftPercent = 20 + Math.random() * 60;
+      let attempts = 0;
+      const minDistance = 15; // Distancia mínima del 15% entre burbujas
+
+      while (attempts < 5) {
+        const tooClose = prev.some(b => Math.abs(b.leftPercent - leftPercent) < minDistance);
+        if (!tooClose) break;
+        leftPercent = 20 + Math.random() * 60;
+        attempts++;
+      }
 
       safeTimeout(() => {
         setBubbles(p => p.filter(b => b.id !== id));
@@ -134,8 +146,8 @@ export default function BubblesGame({ onBack, isFirstTime, onVisit }: { onBack: 
 
       return [...prev, {
         id,
-        leftPercent: 20 + Math.random() * 60, // Limita entre 20% y 80% para asegurar que NO se salgan
-        size: isGolden ? 120 + Math.random() * 30 : 100 + Math.random() * 60,
+        leftPercent,
+        size: isGolden ? 130 + Math.random() * 30 : 110 + Math.random() * 60,
         sound,
         color: isGolden ? 'from-yellow-300 to-amber-500' : sound.color,
         speed,
@@ -151,8 +163,8 @@ export default function BubblesGame({ onBack, isFirstTime, onVisit }: { onBack: 
   }, [spawnBubble]);
 
   const handlePop = (e: React.PointerEvent, bubble: Bubble) => {
+    e.preventDefault();
     e.stopPropagation();
-    if (e.button !== 0 && e.pointerType === 'mouse') return;
 
     setBubbles(prev => {
       const exists = prev.some(b => b.id === bubble.id);
@@ -289,29 +301,28 @@ export default function BubblesGame({ onBack, isFirstTime, onVisit }: { onBack: 
           {bubbles.map(bubble => (
             <motion.button
               key={bubble.id}
-              initial={{ y: '110vh', scale: 0.5, opacity: 0, x: '-50%' }}
+              initial={{ y: '20vh', scale: 0.5, opacity: 0, x: '-50%' }}
               animate={{
-                y: '-20vh',
-                scale: [0.8, 1, 1],
-                opacity: [0, 1, 1, 0],
-                // Variación controlada con translate para evitar salir del contenedor
+                y: '-120vh',
+                scale: 1,
+                opacity: 1,
                 x: ['-50%', '-20%', '-80%', '-50%'],
               }}
               exit={{ scale: 1.6, opacity: 0, filter: 'blur(15px)', transition: { duration: 0.2 } }}
               transition={{
                 y: { duration: bubble.speed, ease: 'linear' },
-                x: { duration: 3 + Math.random() * 2, ease: 'easeInOut' },
-                opacity: { duration: bubble.speed, times: [0, 0.1, 0.9, 1] },
+                x: { duration: 3 + Math.random() * 2, ease: 'easeInOut', repeat: Infinity },
+                opacity: { duration: 0.5 },
               }}
               onPointerDown={(e) => handlePop(e, bubble)}
               style={{
-                left: `${bubble.leftPercent}%`, // Posición base segura en porcentaje
+                left: `${bubble.leftPercent}%`,
                 width: `${bubble.size}px`,
                 height: `${bubble.size}px`,
                 position: 'absolute',
                 bottom: 0,
               }}
-              className="rounded-full flex items-center justify-center relative pointer-events-auto focus:outline-none group cursor-pointer"
+              className="rounded-full flex items-center justify-center relative pointer-events-auto focus:outline-none group cursor-pointer touch-none"
             >
               {/* Esfera de Jabón Normal o Dorada */}
               <div

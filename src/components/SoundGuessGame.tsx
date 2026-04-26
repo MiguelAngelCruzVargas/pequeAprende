@@ -2,49 +2,64 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '../lib/speech';
 import TutorOwl from './TutorOwl';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 
 const rounds = [
   {
-    sound: '🐶',    soundName: 'Guau guau',  question: '¿Qué animal hace ese sonido?',
+    sound: '🐶', soundName: 'Guau guau', question: '¿Qué animal hace ese sonido?',
     correct: { icon: '🐶', name: 'Perro' },
     wrong: [{ icon: '🐱', name: 'Gato' }, { icon: '🦆', name: 'Pato' }],
     audioId: 'perro.mp3',
     bg: 'bg-orange-400',
   },
   {
-    sound: '🐱',    soundName: 'Miau miau',  question: '¿Qué animal hace ese sonido?',
+    sound: '🐱', soundName: 'Miau miau', question: '¿Qué animal hace ese sonido?',
     correct: { icon: '🐱', name: 'Gato' },
     wrong: [{ icon: '🐶', name: 'Perro' }, { icon: '🐮', name: 'Vaca' }],
     audioId: 'gato.mp3',
     bg: 'bg-blue-400',
   },
   {
-    sound: '🐮',    soundName: 'Muuuu',      question: '¿Qué animal hace ese sonido?',
+    sound: '🐮', soundName: 'Muuuu', question: '¿Qué animal hace ese sonido?',
     correct: { icon: '🐮', name: 'Vaca' },
     wrong: [{ icon: '🐑', name: 'Oveja' }, { icon: '🐶', name: 'Perro' }],
     audioId: 'u_jd81cxyq22-cow-mooing-343423.mp3',
     bg: 'bg-emerald-400',
   },
   {
-    sound: '🐑',    soundName: 'Beeee',      question: '¿Qué animal hace ese sonido?',
+    sound: '🐥', soundName: 'Pío pío', question: '¿Qué animal hace ese sonido?',
+    correct: { icon: '🐥', name: 'Pollito' },
+    wrong: [{ icon: '🦆', name: 'Pato' }, { icon: '🐶', name: 'Perro' }],
+    audioId: 'nikin-short-chick-sound-171389.mp3',
+    bg: 'bg-yellow-400',
+  },
+  {
+    sound: '🦁', soundName: 'Grrrrr', question: '¿Qué animal hace ese sonido?',
+    correct: { icon: '🦁', name: 'León' },
+    wrong: [{ icon: '🐵', name: 'Mono' }, { icon: '🐱', name: 'Gato' }],
+    audioId: 'leo.mp3',
+    bg: 'bg-red-400',
+  },
+  {
+    sound: '🐵', soundName: 'Uuu aaa', question: '¿Qué animal hace ese sonido?',
+    correct: { icon: '🐵', name: 'Mono' },
+    wrong: [{ icon: '🦁', name: 'León' }, { icon: '🐶', name: 'Perro' }],
+    audioId: 'u_5cr518l76d-kicks-337331.mp3',
+    bg: 'bg-amber-500',
+  },
+  {
+    sound: '🐑', soundName: 'Beeee', question: '¿Qué animal hace ese sonido?',
     correct: { icon: '🐑', name: 'Oveja' },
     wrong: [{ icon: '🐮', name: 'Vaca' }, { icon: '🦆', name: 'Pato' }],
     audioId: 'stu9-sheep-352668.mp3',
     bg: 'bg-slate-400',
   },
   {
-    sound: '🦆',    soundName: 'Cuac cuac',  question: '¿Qué animal hace ese sonido?',
+    sound: '🦆', soundName: 'Cuac cuac', question: '¿Qué animal hace ese sonido?',
     correct: { icon: '🦆', name: 'Pato' },
-    wrong: [{ icon: '🐔', name: 'Gallina' }, { icon: '🐱', name: 'Gato' }],
+    wrong: [{ icon: '🐥', name: 'Pollito' }, { icon: '🐱', name: 'Gato' }],
     audioId: 'pato.mp3',
     bg: 'bg-cyan-400',
-  },
-  {
-    sound: '🦁',    soundName: 'Grrrrr',     question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🦁', name: 'León' },
-    wrong: [{ icon: '🐻', name: 'Oso' }, { icon: '🐯', name: 'Tigre' }],
-    audioId: 'leo.mp3',
-    bg: 'bg-red-400',
   },
 ];
 

@@ -63,25 +63,25 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
       </div>
 
       {/* ÁREA PRINCIPAL */}
-      <div className="flex-grow flex flex-col w-full px-2 sm:px-4 md:px-8 pt-4 pb-8 overflow-y-auto custom-scrollbar relative z-10">
+      <div className="flex-grow flex flex-col w-full px-2 sm:px-4 md:px-8 pt-4 pb-12 overflow-y-auto custom-scrollbar relative z-10">
 
         {/* Título Mágico */}
-        <div className="text-center shrink-0 mb-4 md:mb-8 mt-2 w-full">
+        <div className="text-center shrink-0 mb-4 md:mb-6 mt-2 w-full">
           <motion.h2 
             animate={{ scale: [1, 1.05, 1] }}
-            className="text-5xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500 drop-shadow-sm uppercase tracking-tight flex items-center justify-center gap-2"
+            className="text-4xl sm:text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500 drop-shadow-sm uppercase tracking-tight flex items-center justify-center gap-2"
           >
             NÚMEROS
           </motion.h2>
-          <div className="mt-2 inline-flex items-center px-6 py-1 bg-white/50  rounded-full border border-blue-100 text-blue-600 font-black uppercase text-sm md:text-lg">
+          <div className="mt-1 inline-flex items-center px-6 py-1 bg-white/50 rounded-full border border-blue-100 text-blue-600 font-black uppercase text-xs sm:text-base md:text-lg">
             ¡Toca para contar! 🔢
           </div>
         </div>
 
-        <div className="w-full flex flex-col gap-4 sm:gap-6 max-w-4xl mx-auto">
+        <div className="w-full flex flex-col gap-4 sm:gap-6 max-w-5xl mx-auto">
 
-          {/* Grid de Números (10 botones estilo Gominola) */}
-          <div className="grid grid-cols-5 gap-2 sm:gap-4 p-2">
+          {/* Grid de Números Adaptativo */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 p-2">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num, i) => {
               const style = numberStyles[i];
               return (
@@ -110,7 +110,7 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
 
                   <motion.span
                     animate={activeNumber === num ? { scale: [1, 1.3, 1] } : { scale: 1 }}
-                    className="text-2xl sm:text-5xl md:text-6xl font-black drop-shadow-[0_4px_4px_rgba(0,0,0,0.2)] relative z-10"
+                    className="text-3xl sm:text-5xl md:text-6xl font-black drop-shadow-[0_4px_4px_rgba(0,0,0,0.2)] relative z-10"
                   >
                     {num}
                   </motion.span>
@@ -119,9 +119,9 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
             })}
           </div>
 
-          {/* Área de Visualización de Estrellas (Bandeja Mágica) */}
-          <div className="w-full mt-2">
-            <div className="bg-white/60  rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 flex flex-wrap content-center items-center justify-center gap-3 sm:gap-6 border-4 border-white shadow-md min-h-[220px] sm:min-h-[350px] relative overflow-hidden">
+          {/* Área de Visualización de Estrellas (Compacta para Tablets) */}
+          <div className="w-full mt-2 pb-10">
+            <div className="bg-white/60 rounded-[2.5rem] sm:rounded-[3.5rem] p-4 sm:p-8 flex flex-wrap content-center items-center justify-center gap-2 sm:gap-4 border-4 border-white shadow-md min-h-[160px] sm:min-h-[250px] md:min-h-[300px] relative overflow-hidden">
 
               <AnimatePresence mode="popLayout">
                 {selected ? (
@@ -131,22 +131,22 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
                       initial={{ scale: 0, rotate: -45, y: 30 }}
                       animate={{ scale: 1, rotate: 0, y: 0 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      transition={{ type: 'spring', damping: 12, stiffness: 200, delay: i * 0.08 }}
+                      transition={{ type: 'spring', damping: 12, stiffness: 200, delay: i * 0.05 }}
                       className="relative z-10"
                     >
-                      <Star className="w-10 h-10 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-yellow-400 fill-yellow-400 drop-shadow-[0_5px_10px_rgba(0,0,0,0.15)]" />
+                      <Star className="w-8 h-8 sm:w-14 sm:h-14 lg:w-20 lg:h-20 text-yellow-400 fill-yellow-400 drop-shadow-[0_5px_10px_rgba(0,0,0,0.15)]" />
                     </motion.div>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center gap-4 relative z-10 opacity-70">
+                  <div className="flex flex-col items-center gap-2 relative z-10 opacity-70">
                     <motion.div
                       animate={{ y: [0, -10, 0] }}
                       transition={{ duration: 2, ease: "easeInOut" }}
-                      className="text-5xl sm:text-7xl"
+                      className="text-4xl sm:text-6xl"
                     >
                       👆
                     </motion.div>
-                    <p className="text-base sm:text-2xl text-blue-500 font-black tracking-wide">
+                    <p className="text-sm sm:text-2xl text-blue-500 font-black tracking-wide">
                       Selecciona un número
                     </p>
                   </div>
