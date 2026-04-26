@@ -75,18 +75,38 @@ export default function SoundGuessGame({ onBack, isFirstTime, onVisit }: { onBac
   const hasSpoken = useRef(false);
   const round = rounds[index % rounds.length];
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const loadRoundTimerRef = useRef<number | null>(null);
 
-  const playAnimalSound = () => {
-    if (status === 'listening') return;
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current.currentTime = 0;
-    }
-    const audio = new Audio(`/sonidos/${round.audioId}`);
+  const stopCurrentAudio = () => {
+    if (!currentAudioRef.current) return;
+    currentAudioRef.current.pause();
+    currentAudioRef.current.currentTime = 0;
+    currentAudioRef.current.onended = null;
+    currentAudioRef.current.onerror = null;
+    currentAudioRef.current = null;
+  };
+
+  const playRoundAudio = async (audioId: string) => {
+    stopCurrentAudio();
+    const audio = new Audio(`/sonidos/${audioId}`);
     currentAudioRef.current = audio;
-    audio.play().catch(console.error);
-    setStatus('listening');
+
     audio.onended = () => setStatus('idle');
+    audio.onerror = () => setStatus('idle');
+
+    try {
+      await audio.play();
+      setStatus('listening');
+    } catch (error) {
+      // If autoplay is blocked, keep UI interactive so the child can tap again.
+      setStatus('idle');
+      console.error('No se pudo reproducir el audio:', error);
+    }
+  };
+
+  const playAnimalSound = async () => {
+    if (status === 'listening') return;
+    await playRoundAudio(round.audioId);
   };
 
   const loadRound = (i: number, first = false) => {
@@ -94,14 +114,14 @@ export default function SoundGuessGame({ onBack, isFirstTime, onVisit }: { onBac
     const opts = shuffle([r.correct, ...r.wrong]);
     setOptions(opts);
     setStatus('idle');
-    setTimeout(() => {
+    if (loadRoundTimerRef.current) {
+      window.clearTimeout(loadRoundTimerRef.current);
+      loadRoundTimerRef.current = null;
+    }
+    loadRoundTimerRef.current = window.setTimeout(() => {
       speak(`¿Qué animal hace este sonido? ¡Escucha bien!`, true);
-      setTimeout(() => {
-        const audio = new Audio(`/sonidos/${r.audioId}`);
-        currentAudioRef.current = audio;
-        audio.play().catch(console.error);
-        setStatus('listening');
-        audio.onended = () => setStatus('idle');
+      loadRoundTimerRef.current = window.setTimeout(() => {
+        playRoundAudio(r.audioId);
       }, 1500);
     }, first ? 200 : 400);
   };
@@ -117,7 +137,12 @@ export default function SoundGuessGame({ onBack, isFirstTime, onVisit }: { onBac
         loadRound(0, true);
       }
     }
-    return () => { currentAudioRef.current?.pause(); };
+    return () => {
+      if (loadRoundTimerRef.current) {
+        window.clearTimeout(loadRoundTimerRef.current);
+      }
+      stopCurrentAudio();
+    };
   }, []);
 
   const handleAnswer = (choice: { icon: string; name: string }) => {

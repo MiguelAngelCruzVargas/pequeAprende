@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '../lib/speech';
-import { Circle, Square, Triangle, Star, Heart, Hexagon, Pentagon, Diamond, Plus, ArrowLeft, Shapes } from 'lucide-react';
+import { Circle, Square, Triangle, Star, Heart, Hexagon, Pentagon, Diamond, ArrowLeft, Shapes } from 'lucide-react';
 
 const TrapezoidIcon = (props: any) => (
   <svg
@@ -19,7 +19,7 @@ const CrossIcon = (props: any) => (
     viewBox="0 0 24 24"
     fill="currentColor"
   >
-    <path d="M8 2h8v6h6v8h-6v6H8v-6H2V8h6V2z" />
+    <path d="M6.34 4.93L12 10.59l5.66-5.66 1.41 1.41L13.41 12l5.66 5.66-1.41 1.41L12 13.41l-5.66 5.66-1.41-1.41L10.59 12 4.93 6.34z" />
   </svg>
 );
 
@@ -31,7 +31,7 @@ const shapes = [
   { name: 'Hexágono', Icon: Hexagon, bg: 'bg-emerald-500', shadow: 'shadow-[0_12px_0_#064e3b]', activeShadow: 'active:shadow-[0_0px_0_#064e3b]' },
   { name: 'Pentágono', Icon: Pentagon, bg: 'bg-yellow-400', shadow: 'shadow-[0_12px_0_#713f12]', activeShadow: 'active:shadow-[0_0px_0_#713f12]' },
   { name: 'Rombo', Icon: Diamond, bg: 'bg-amber-500', shadow: 'shadow-[0_12px_0_#78350f]', activeShadow: 'active:shadow-[0_0px_0_#78350f]' },
-  { name: 'Cruz', Icon: CrossIcon, bg: 'bg-blue-500', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]', isSolid: true },
+  { name: 'X', Icon: CrossIcon, bg: 'bg-blue-500', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]', isSolid: true },
   { name: 'Trapecio', Icon: TrapezoidIcon, bg: 'bg-orange-500', shadow: 'shadow-[0_12px_0_#9a3412]', activeShadow: 'active:shadow-[0_0px_0_#9a3412]', isSolid: true },
   { name: 'Corazón', Icon: Heart, bg: 'bg-pink-500', shadow: 'shadow-[0_12px_0_#831843]', activeShadow: 'active:shadow-[0_0px_0_#831843]' },
 ];

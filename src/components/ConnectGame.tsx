@@ -175,7 +175,19 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     setTimeout(() => setPraiseVisible(false), 1200);
   }, []);
 
-  const handlePointerDown = (id: string, side: 'left' | 'right', e: React.PointerEvent) => {
+  const updateMousePosFromClient = (clientX: number, clientY: number) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMousePos({ x: clientX - rect.left, y: clientY - rect.top });
+    }
+  };
+
+  const handleDragStart = (
+    id: string,
+    side: 'left' | 'right',
+    clientX: number,
+    clientY: number,
+  ) => {
     if (completed) return;
     const isConnected = side === 'left'
       ? connections[id]
@@ -183,79 +195,128 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     if (isConnected) return;
 
     setDraggingFrom({ id, side });
-    updateMousePos(e);
+    updateMousePosFromClient(clientX, clientY);
   };
 
-  const updateMousePos = (e: React.PointerEvent | PointerEvent) => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  const handlePointerDown = (id: string, side: 'left' | 'right', e: React.PointerEvent) => {
+    e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Some tablet browsers can throw here; drag still works via window listeners.
     }
+    handleDragStart(id, side, e.clientX, e.clientY);
+  };
+
+  const handleTouchStart = (id: string, side: 'left' | 'right', e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (!t) return;
+    e.preventDefault();
+    handleDragStart(id, side, t.clientX, t.clientY);
+  };
+
+  const completeDragAtPoint = (clientX: number, clientY: number) => {
+    if (!draggingFrom) return;
+
+    const elements = document.elementsFromPoint(clientX, clientY);
+    const oppositeSide = draggingFrom.side === 'left' ? 'right' : 'left';
+    const targetElement = elements.find(el => el.hasAttribute(`data-${oppositeSide}-id`));
+
+    if (targetElement) {
+      const targetId = targetElement.getAttribute(`data-${oppositeSide}-id`)!;
+
+      const leftItem = draggingFrom.side === 'left'
+        ? leftItems.find(i => i.id === draggingFrom.id)
+        : leftItems.find(i => i.id === targetId);
+
+      const rightItem = draggingFrom.side === 'right'
+        ? rightItems.find(i => i.id === draggingFrom.id)
+        : rightItems.find(i => i.id === targetId);
+
+      if (leftItem && rightItem && leftItem.value === rightItem.value) {
+        // ✅ Correcto
+        const newConnections = { ...connections, [leftItem.id]: rightItem.id };
+        setConnections(newConnections);
+
+        // Flash verde en el item
+        setCorrectFlash(leftItem.id);
+        setTimeout(() => setCorrectFlash(null), 600);
+
+        // Partículas en el punto de suelta
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        if (containerRect) {
+          spawnParticles(clientX - containerRect.left, clientY - containerRect.top);
+        }
+
+        // Texto de alabanza aleatorio
+        const praise = PRAISE_MESSAGES[Math.floor(Math.random() * PRAISE_MESSAGES.length)];
+        speak(praise.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ !]/g, ''));
+        showPraise(praise);
+
+        if (Object.keys(newConnections).length === leftItems.length) {
+          setCompleted(true);
+          setTimeout(() => speak('¡Lo lograste! ¡Eres una estrella!'), 600);
+        }
+      } else {
+        // ❌ Incorrecto
+        setWrongFlash(true);
+        setTimeout(() => setWrongFlash(false), 500);
+        speak('¡Inténtalo otra vez!');
+      }
+    }
+
+    setDraggingFrom(null);
   };
 
   useEffect(() => {
     const handlePointerMove = (e: PointerEvent) => {
-      if (draggingFrom) updateMousePos(e);
+      if (draggingFrom) updateMousePosFromClient(e.clientX, e.clientY);
     };
 
     const handlePointerUp = (e: PointerEvent) => {
+      completeDragAtPoint(e.clientX, e.clientY);
+    };
+
+    const handlePointerCancel = () => {
+      setDraggingFrom(null);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
       if (!draggingFrom) return;
+      const t = e.touches[0];
+      if (!t) return;
+      e.preventDefault();
+      updateMousePosFromClient(t.clientX, t.clientY);
+    };
 
-      const elements = document.elementsFromPoint(e.clientX, e.clientY);
-      const oppositeSide = draggingFrom.side === 'left' ? 'right' : 'left';
-      const targetElement = elements.find(el => el.hasAttribute(`data-${oppositeSide}-id`));
-
-      if (targetElement) {
-        const targetId = targetElement.getAttribute(`data-${oppositeSide}-id`)!;
-
-        const leftItem = draggingFrom.side === 'left'
-          ? leftItems.find(i => i.id === draggingFrom.id)
-          : leftItems.find(i => i.id === targetId);
-
-        const rightItem = draggingFrom.side === 'right'
-          ? rightItems.find(i => i.id === draggingFrom.id)
-          : rightItems.find(i => i.id === targetId);
-
-        if (leftItem && rightItem && leftItem.value === rightItem.value) {
-          // ✅ Correcto
-          const newConnections = { ...connections, [leftItem.id]: rightItem.id };
-          setConnections(newConnections);
-
-          // Flash verde en el item
-          setCorrectFlash(leftItem.id);
-          setTimeout(() => setCorrectFlash(null), 600);
-
-          // Partículas en el punto de suelta
-          const containerRect = containerRef.current?.getBoundingClientRect();
-          if (containerRect) {
-            spawnParticles(e.clientX - containerRect.left, e.clientY - containerRect.top);
-          }
-
-          // Texto de alabanza aleatorio
-          const praise = PRAISE_MESSAGES[Math.floor(Math.random() * PRAISE_MESSAGES.length)];
-          speak(praise.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ !]/g, ''));
-          showPraise(praise);
-
-          if (Object.keys(newConnections).length === leftItems.length) {
-            setCompleted(true);
-            setTimeout(() => speak('¡Lo lograste! ¡Eres una estrella!'), 600);
-          }
-        } else {
-          // ❌ Incorrecto
-          setWrongFlash(true);
-          setTimeout(() => setWrongFlash(false), 500);
-          speak('¡Inténtalo otra vez!');
-        }
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!draggingFrom) return;
+      const t = e.changedTouches[0];
+      if (!t) {
+        setDraggingFrom(null);
+        return;
       }
+      e.preventDefault();
+      completeDragAtPoint(t.clientX, t.clientY);
+    };
 
+    const handleTouchCancel = () => {
       setDraggingFrom(null);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerCancel);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
+    window.addEventListener('touchcancel', handleTouchCancel, { passive: false });
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerCancel);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchCancel);
     };
   }, [draggingFrom, leftItems, rightItems, connections, spawnParticles, showPraise]);
 
@@ -489,6 +550,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   ref={el => leftRefs.current[item.id] = el}
                   data-left-id={item.id}
                   onPointerDown={(e) => handlePointerDown(item.id, 'left', e)}
+                  onTouchStart={(e) => handleTouchStart(item.id, 'left', e)}
                   animate={isFlashing
                     ? { scale: [1, 1.3, 0.95, 1.1, 1], rotate: [0, -5, 5, -3, 0] }
                     : { scale: 1, opacity: 1 }
@@ -504,6 +566,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                       : isConnected
                         ? `0 6px 0 ${c.shadow}`
                         : `0 8px 0 ${c.shadow}`,
+                    touchAction: 'none',
                   }}
                   className={`
                     w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem]
@@ -560,6 +623,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   ref={el => rightRefs.current[item.id] = el}
                   data-right-id={item.id}
                   onPointerDown={(e) => handlePointerDown(item.id, 'right', e)}
+                  onTouchStart={(e) => handleTouchStart(item.id, 'right', e)}
                   animate={isFlashing
                     ? { scale: [1, 1.3, 0.95, 1.1, 1], rotate: [0, 5, -5, 3, 0] }
                     : { scale: 1, opacity: 1 }
@@ -574,6 +638,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                       : isConnected
                         ? `0 6px 0 ${c.shadow}`
                         : `0 8px 0 ${c.shadow}`,
+                    touchAction: 'none',
                   }}
                   className={`
                     w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem]
