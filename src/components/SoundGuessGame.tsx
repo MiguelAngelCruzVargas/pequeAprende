@@ -7,56 +7,56 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 const rounds = [
   {
     sound: '🐶', soundName: 'Guau guau', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🐶', name: 'Perro' },
+    correct: { icon: '🐶', name: 'Perro', article: 'el' },
     wrong: [{ icon: '🐱', name: 'Gato' }, { icon: '🦆', name: 'Pato' }],
     audioId: 'perro.mp3',
     bg: 'bg-orange-400',
   },
   {
     sound: '🐱', soundName: 'Miau miau', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🐱', name: 'Gato' },
+    correct: { icon: '🐱', name: 'Gato', article: 'el' },
     wrong: [{ icon: '🐶', name: 'Perro' }, { icon: '🐮', name: 'Vaca' }],
     audioId: 'gato.mp3',
     bg: 'bg-blue-400',
   },
   {
     sound: '🐮', soundName: 'Muuuu', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🐮', name: 'Vaca' },
+    correct: { icon: '🐮', name: 'Vaca', article: 'la' },
     wrong: [{ icon: '🐑', name: 'Oveja' }, { icon: '🐶', name: 'Perro' }],
     audioId: 'u_jd81cxyq22-cow-mooing-343423.mp3',
     bg: 'bg-emerald-400',
   },
   {
     sound: '🐥', soundName: 'Pío pío', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🐥', name: 'Pollito' },
+    correct: { icon: '🐥', name: 'Pollito', article: 'el' },
     wrong: [{ icon: '🦆', name: 'Pato' }, { icon: '🐶', name: 'Perro' }],
     audioId: 'nikin-short-chick-sound-171389.mp3',
     bg: 'bg-yellow-400',
   },
   {
     sound: '🦁', soundName: 'Grrrrr', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🦁', name: 'León' },
+    correct: { icon: '🦁', name: 'León', article: 'el' },
     wrong: [{ icon: '🐵', name: 'Mono' }, { icon: '🐱', name: 'Gato' }],
     audioId: 'leo.mp3',
     bg: 'bg-red-400',
   },
   {
     sound: '🐵', soundName: 'Uuu aaa', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🐵', name: 'Mono' },
+    correct: { icon: '🐵', name: 'Mono', article: 'el' },
     wrong: [{ icon: '🦁', name: 'León' }, { icon: '🐶', name: 'Perro' }],
     audioId: 'u_5cr518l76d-kicks-337331.mp3',
     bg: 'bg-amber-500',
   },
   {
     sound: '🐑', soundName: 'Beeee', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🐑', name: 'Oveja' },
+    correct: { icon: '🐑', name: 'Oveja', article: 'la' },
     wrong: [{ icon: '🐮', name: 'Vaca' }, { icon: '🦆', name: 'Pato' }],
     audioId: 'stu9-sheep-352668.mp3',
     bg: 'bg-slate-400',
   },
   {
     sound: '🦆', soundName: 'Cuac cuac', question: '¿Qué animal hace ese sonido?',
-    correct: { icon: '🦆', name: 'Pato' },
+    correct: { icon: '🦆', name: 'Pato', article: 'el' },
     wrong: [{ icon: '🐥', name: 'Pollito' }, { icon: '🐱', name: 'Gato' }],
     audioId: 'pato.mp3',
     bg: 'bg-cyan-400',
@@ -150,7 +150,7 @@ export default function SoundGuessGame({ onBack, isFirstTime, onVisit }: { onBac
     if (choice.name === round.correct.name) {
       setStatus('correct');
       setStars(s => s + 1);
-      speak(`¡Correcto! Es el ${round.correct.name}. ¡Muy bien!`);
+      speak(`¡Correcto! Es ${round.correct.article} ${round.correct.name}. ¡Muy bien!`);
       setTimeout(() => {
         const next = index + 1;
         setIndex(next);
@@ -158,7 +158,7 @@ export default function SoundGuessGame({ onBack, isFirstTime, onVisit }: { onBac
       }, 2200);
     } else {
       setStatus('wrong');
-      speak(`No exactamente. Era el ${round.correct.name}.`);
+      speak(`No exactamente. Era ${round.correct.article} ${round.correct.name}.`);
       setTimeout(() => setStatus('idle'), 1800);
     }
   };
@@ -316,7 +316,7 @@ export default function SoundGuessGame({ onBack, isFirstTime, onVisit }: { onBac
                   : 'bg-gradient-to-r from-red-400 to-rose-600 shadow-[0_12px_0_#991B1B]'}
               `}
             >
-              {status === 'correct' ? '🌟 ¡CORRECTO!' : `ES EL ${round.correct.name.toUpperCase()} ${round.sound}`}
+              {status === 'correct' ? '🌟 ¡CORRECTO!' : `ES ${round.correct.article.toUpperCase()} ${round.correct.name.toUpperCase()} ${round.sound}`}
             </motion.div>
           )}
         </AnimatePresence>

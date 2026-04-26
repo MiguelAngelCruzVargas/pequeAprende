@@ -80,6 +80,8 @@ body,
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
   -ms-overflow-style: none;
   /* Edge/IE */
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ═══════════════════════════════════════════

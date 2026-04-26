@@ -111,6 +111,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   const [correctFlash, setCorrectFlash] = useState<string | null>(null); // leftId que acaba de conectar
   const [wrongFlash, setWrongFlash] = useState<boolean>(false);
   const [draggingFrom, setDraggingFrom] = useState<{ id: string; side: 'left' | 'right' } | null>(null);
+  const [selectedTap, setSelectedTap] = useState<{ id: string; side: 'left' | 'right' } | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [completed, setCompleted] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -120,6 +121,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   const containerRef = useRef<HTMLDivElement>(null);
   const leftRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rightRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const ignoreNextClickRef = useRef(false);
 
   useEffect(() => {
     initGame();
@@ -150,6 +152,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     setLeftItems(left);
     setRightItems(right);
     setConnections({});
+    setSelectedTap(null);
     setCompleted(false);
     setParticles([]);
     setPraiseVisible(false);
@@ -194,7 +197,9 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
       : Object.values(connections).includes(id);
     if (isConnected) return;
 
+    ignoreNextClickRef.current = true;
     setDraggingFrom({ id, side });
+    setSelectedTap({ id, side });
     updateMousePosFromClient(clientX, clientY);
   };
 
@@ -210,57 +215,112 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     handleDragStart(id, side, t.clientX, t.clientY);
   };
 
+  const connectPair = (leftId: string, rightId: string, point?: { x: number; y: number }): boolean => {
+    const leftItem = leftItems.find(i => i.id === leftId);
+    const rightItem = rightItems.find(i => i.id === rightId);
+    if (!leftItem || !rightItem) return false;
+
+    if (leftItem.value === rightItem.value) {
+      const newConnections = { ...connections, [leftItem.id]: rightItem.id };
+      setConnections(newConnections);
+      setCorrectFlash(leftItem.id);
+      setTimeout(() => setCorrectFlash(null), 600);
+
+      if (point && containerRef.current) {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        spawnParticles(point.x - containerRect.left, point.y - containerRect.top);
+      }
+
+      const praise = PRAISE_MESSAGES[Math.floor(Math.random() * PRAISE_MESSAGES.length)];
+      speak(praise.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ !]/g, ''));
+      showPraise(praise);
+
+      if (Object.keys(newConnections).length === leftItems.length) {
+        setCompleted(true);
+        setTimeout(() => speak('¡Lo lograste! ¡Eres una estrella!'), 600);
+      }
+      return true;
+    }
+
+    setWrongFlash(true);
+    setTimeout(() => setWrongFlash(false), 500);
+    speak('¡Inténtalo otra vez!');
+    return false;
+  };
+
+  const findNearestTargetId = (
+    side: 'left' | 'right',
+    clientX: number,
+    clientY: number,
+    maxDistance = 140,
+  ): string | null => {
+    const refs = side === 'left' ? leftRefs.current : rightRefs.current;
+    const occupiedIds = new Set(
+      side === 'left' ? Object.keys(connections) : Object.values(connections),
+    );
+
+    let bestId: string | null = null;
+    let bestDist = Number.POSITIVE_INFINITY;
+
+    Object.entries(refs).forEach(([id, el]) => {
+      if (!el || occupiedIds.has(id)) return;
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const d = Math.hypot(clientX - cx, clientY - cy);
+      if (d < bestDist) {
+        bestDist = d;
+        bestId = id;
+      }
+    });
+
+    if (bestDist <= maxDistance) return bestId;
+    return null;
+  };
+
   const completeDragAtPoint = (clientX: number, clientY: number) => {
     if (!draggingFrom) return;
 
     const elements = document.elementsFromPoint(clientX, clientY);
     const oppositeSide = draggingFrom.side === 'left' ? 'right' : 'left';
     const targetElement = elements.find(el => el.hasAttribute(`data-${oppositeSide}-id`));
+    const targetIdFromMagnet = findNearestTargetId(oppositeSide, clientX, clientY);
+    const targetId = targetElement?.getAttribute(`data-${oppositeSide}-id`) ?? targetIdFromMagnet;
 
-    if (targetElement) {
-      const targetId = targetElement.getAttribute(`data-${oppositeSide}-id`)!;
-
-      const leftItem = draggingFrom.side === 'left'
-        ? leftItems.find(i => i.id === draggingFrom.id)
-        : leftItems.find(i => i.id === targetId);
-
-      const rightItem = draggingFrom.side === 'right'
-        ? rightItems.find(i => i.id === draggingFrom.id)
-        : rightItems.find(i => i.id === targetId);
-
-      if (leftItem && rightItem && leftItem.value === rightItem.value) {
-        // ✅ Correcto
-        const newConnections = { ...connections, [leftItem.id]: rightItem.id };
-        setConnections(newConnections);
-
-        // Flash verde en el item
-        setCorrectFlash(leftItem.id);
-        setTimeout(() => setCorrectFlash(null), 600);
-
-        // Partículas en el punto de suelta
-        const containerRect = containerRef.current?.getBoundingClientRect();
-        if (containerRect) {
-          spawnParticles(clientX - containerRect.left, clientY - containerRect.top);
-        }
-
-        // Texto de alabanza aleatorio
-        const praise = PRAISE_MESSAGES[Math.floor(Math.random() * PRAISE_MESSAGES.length)];
-        speak(praise.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ !]/g, ''));
-        showPraise(praise);
-
-        if (Object.keys(newConnections).length === leftItems.length) {
-          setCompleted(true);
-          setTimeout(() => speak('¡Lo lograste! ¡Eres una estrella!'), 600);
-        }
-      } else {
-        // ❌ Incorrecto
-        setWrongFlash(true);
-        setTimeout(() => setWrongFlash(false), 500);
-        speak('¡Inténtalo otra vez!');
-      }
+    if (targetId) {
+      const leftId = draggingFrom.side === 'left' ? draggingFrom.id : targetId;
+      const rightId = draggingFrom.side === 'right' ? draggingFrom.id : targetId;
+      connectPair(leftId, rightId, { x: clientX, y: clientY });
     }
 
     setDraggingFrom(null);
+    setSelectedTap(null);
+    window.setTimeout(() => {
+      ignoreNextClickRef.current = false;
+    }, 120);
+  };
+
+  const handleTapConnect = (id: string, side: 'left' | 'right') => {
+    if (completed || ignoreNextClickRef.current) return;
+    const isConnected = side === 'left'
+      ? Boolean(connections[id])
+      : Object.values(connections).includes(id);
+    if (isConnected) return;
+
+    if (!selectedTap) {
+      setSelectedTap({ id, side });
+      return;
+    }
+
+    if (selectedTap.side === side) {
+      setSelectedTap({ id, side });
+      return;
+    }
+
+    const leftId = side === 'left' ? id : selectedTap.id;
+    const rightId = side === 'right' ? id : selectedTap.id;
+    connectPair(leftId, rightId);
+    setSelectedTap(null);
   };
 
   useEffect(() => {
@@ -350,7 +410,8 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
       className={`h-[100dvh] flex flex-col w-full overflow-hidden font-sans select-none transition-all duration-300 ${wrongFlash
           ? 'bg-gradient-to-b from-red-100 via-red-50 to-pink-50'
           : 'bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50'
-        }`}
+        } touch-none`}
+      style={{ touchAction: 'none' }}
     >
       {/* HEADER */}
       <div className="relative z-40 flex items-center justify-between px-3 py-2 bg-white/90 shadow-sm rounded-b-3xl border-b-4 border-white">
@@ -540,9 +601,12 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   data-left-id={item.id}
                   onMouseDown={(e) => handleMouseDown(item.id, 'left', e)}
                   onTouchStart={(e) => handleTouchStart(item.id, 'left', e)}
+                  onClick={() => handleTapConnect(item.id, 'left')}
                   animate={isFlashing
                     ? { scale: [1, 1.3, 0.95, 1.1, 1], rotate: [0, -5, 5, -3, 0] }
-                    : { scale: 1, opacity: 1 }
+                    : selectedTap?.id === item.id && selectedTap.side === 'left'
+                      ? { scale: 1.12, opacity: 1 }
+                      : { scale: 1, opacity: 1 }
                   }
                   transition={{ duration: 0.5 }}
                   whileHover={!isConnected ? { scale: 1.1 } : {}}
@@ -613,9 +677,12 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   data-right-id={item.id}
                   onMouseDown={(e) => handleMouseDown(item.id, 'right', e)}
                   onTouchStart={(e) => handleTouchStart(item.id, 'right', e)}
+                  onClick={() => handleTapConnect(item.id, 'right')}
                   animate={isFlashing
                     ? { scale: [1, 1.3, 0.95, 1.1, 1], rotate: [0, 5, -5, 3, 0] }
-                    : { scale: 1, opacity: 1 }
+                    : selectedTap?.id === item.id && selectedTap.side === 'right'
+                      ? { scale: 1.12, opacity: 1 }
+                      : { scale: 1, opacity: 1 }
                   }
                   transition={{ duration: 0.5 }}
                   whileHover={!isConnected ? { scale: 1.1 } : {}}

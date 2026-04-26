@@ -178,7 +178,7 @@ function App() {
   ];
 
   return (
-    <div className="fixed inset-0 w-full font-sans overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-green-100 flex flex-col">
+    <div className="relative w-full h-[100svh] min-h-[100svh] font-sans overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-green-100 flex flex-col">
       {isOffline && (
         <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-full bg-amber-100 text-amber-800 border-2 border-amber-300 shadow-md font-black text-xs sm:text-sm uppercase tracking-wide">
           Modo sin internet: juegos locales activos
@@ -186,7 +186,7 @@ function App() {
       )}
 
       {/* CAPA DE FONDO — Usando CSS puro para máximo rendimiento en iPad */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
 
         {/* Sol estático con CSS animation */}
         <img
