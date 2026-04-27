@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '../lib/speech';
-import { ArrowLeft, Link2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface Item {
   id: string;
@@ -20,6 +20,8 @@ interface Particle {
   angle: number;
 }
 
+type ConnectMode = 'shapes' | 'colors' | 'animals';
+
 // Color de fondo vivo para cada figura — bg + borde + sombra
 const ITEM_COLORS: Record<string, { bg: string; border: string; shadow: string; line: string }> = {
   circle: { bg: '#fef9c3', border: '#facc15', shadow: '#ca8a04', line: '#f59e0b' },
@@ -34,12 +36,14 @@ const ITEM_COLORS: Record<string, { bg: string; border: string; shadow: string; 
   flower: { bg: '#fdf2f8', border: '#e879f9', shadow: '#86198f', line: '#d946ef' },
   diamond: { bg: '#ecfdf5', border: '#34d399', shadow: '#065f46', line: '#10b981' },
   rainbow: { bg: '#fdf4ff', border: '#c084fc', shadow: '#7e22ce', line: '#a855f7' },
-  // números
-  '1': { bg: '#fee2e2', border: '#f87171', shadow: '#b91c1c', line: '#ef4444' },
-  '2': { bg: '#dbeafe', border: '#60a5fa', shadow: '#1d4ed8', line: '#3b82f6' },
-  '3': { bg: '#dcfce7', border: '#4ade80', shadow: '#15803d', line: '#22c55e' },
-  '4': { bg: '#fef9c3', border: '#facc15', shadow: '#ca8a04', line: '#f59e0b' },
-  '5': { bg: '#ede9fe', border: '#a78bfa', shadow: '#6d28d9', line: '#8b5cf6' },
+  dog: { bg: '#fff7ed', border: '#fb923c', shadow: '#c2410c', line: '#f97316' },
+  cat: { bg: '#fef3c7', border: '#fbbf24', shadow: '#b45309', line: '#f59e0b' },
+  fish: { bg: '#e0f2fe', border: '#38bdf8', shadow: '#0369a1', line: '#0ea5e9' },
+  bird: { bg: '#dcfce7', border: '#4ade80', shadow: '#15803d', line: '#22c55e' },
+  rabbit: { bg: '#fdf2f8', border: '#f472b6', shadow: '#be185d', line: '#ec4899' },
+  turtle: { bg: '#ecfdf5', border: '#34d399', shadow: '#065f46', line: '#10b981' },
+  lion: { bg: '#fef9c3', border: '#facc15', shadow: '#ca8a04', line: '#eab308' },
+  monkey: { bg: '#fee2e2', border: '#f87171', shadow: '#b91c1c', line: '#ef4444' },
 };
 
 // Color default si no hay coincidencia
@@ -73,18 +77,21 @@ const COLORS = [
   { id: 'c8', type: 'color', value: '#06b6d4', label: 'Celeste' },
 ];
 
-const NUMBERS = [
-  { id: 'n1', type: 'shape', value: '1', label: 'Uno', icon: '1️⃣', matchIcon: '⭐' },
-  { id: 'n2', type: 'shape', value: '2', label: 'Dos', icon: '2️⃣', matchIcon: '⭐⭐' },
-  { id: 'n3', type: 'shape', value: '3', label: 'Tres', icon: '3️⃣', matchIcon: '⭐⭐⭐' },
-  { id: 'n4', type: 'shape', value: '4', label: 'Cuatro', icon: '4️⃣', matchIcon: '⭐⭐⭐⭐' },
-  { id: 'n5', type: 'shape', value: '5', label: 'Cinco', icon: '5️⃣', matchIcon: '⭐⭐⭐⭐⭐' },
+const ANIMALS = [
+  { id: 'a1', type: 'shape', value: 'dog', label: 'Perro', icon: '🐶' },
+  { id: 'a2', type: 'shape', value: 'cat', label: 'Gato', icon: '🐱' },
+  { id: 'a3', type: 'shape', value: 'fish', label: 'Pez', icon: '🐟' },
+  { id: 'a4', type: 'shape', value: 'bird', label: 'Pájaro', icon: '🐦' },
+  { id: 'a5', type: 'shape', value: 'rabbit', label: 'Conejo', icon: '🐰' },
+  { id: 'a6', type: 'shape', value: 'turtle', label: 'Tortuga', icon: '🐢' },
+  { id: 'a7', type: 'shape', value: 'lion', label: 'León', icon: '🦁' },
+  { id: 'a8', type: 'shape', value: 'monkey', label: 'Mono', icon: '🐵' },
 ];
 
 const MODES = [
   { key: 'shapes', label: 'Figuras', icon: '⭐' },
   { key: 'colors', label: 'Colores', icon: '🎨' },
-  { key: 'numbers', label: 'Números', icon: '🔢' },
+  { key: 'animals', label: 'Animales', icon: '🐶' },
 ] as const;
 
 const PRAISE_MESSAGES = [
@@ -95,6 +102,14 @@ const PRAISE_MESSAGES = [
   '¡Lo lograste! 🏆',
 ];
 
+const MODE_HINTS: Record<ConnectMode, string> = {
+  shapes: 'Conecta la misma figura.',
+  colors: 'Conecta el mismo color.',
+  animals: 'Conecta el mismo animal.',
+};
+
+const PAIRS_PER_ROUND = 3;
+
 const CONFETTI_COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9ff3', '#ff6348'];
 
 let particleId = 0;
@@ -104,7 +119,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   isFirstTime: boolean;
   onVisit: () => void;
 }) {
-  const [mode, setMode] = useState<'shapes' | 'colors' | 'numbers'>('shapes');
+  const [mode, setMode] = useState<ConnectMode>('shapes');
   const [leftItems, setLeftItems] = useState<Item[]>([]);
   const [rightItems, setRightItems] = useState<Item[]>([]);
   const [connections, setConnections] = useState<Record<string, string>>({});
@@ -126,10 +141,10 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   useEffect(() => {
     initGame();
     if (isFirstTime) {
-      speak('¡Hola! Conecta las figuras que son iguales con tu dedo.');
+      speak('¡Hola! Toca o arrastra para unir los iguales.');
       onVisit();
     } else {
-      speak('¡Vamos a conectar!');
+      speak(MODE_HINTS[mode]);
     }
   }, [mode]);
 
@@ -137,16 +152,16 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     let pool: any[] = [];
     if (mode === 'shapes') pool = SHAPES;
     else if (mode === 'colors') pool = COLORS;
-    else pool = NUMBERS;
+    else pool = ANIMALS;
 
-    const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, 4);
+    const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, PAIRS_PER_ROUND);
 
     const left = selected.map(item => ({ ...item, displayIcon: item.icon || '' }))
       .sort(() => Math.random() - 0.5);
 
     const right = selected.map(item => ({
       ...item,
-      displayIcon: mode === 'numbers' ? (item as any).matchIcon : (item.icon || ''),
+      displayIcon: item.icon || '',
     })).sort(() => Math.random() - 0.5);
 
     setLeftItems(left);
@@ -244,7 +259,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
 
     setWrongFlash(true);
     setTimeout(() => setWrongFlash(false), 500);
-    speak('¡Inténtalo otra vez!');
+    speak('¡Casi! Busca el igual.');
     return false;
   };
 
@@ -252,7 +267,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     side: 'left' | 'right',
     clientX: number,
     clientY: number,
-    maxDistance = 140,
+    maxDistance = 190,
   ): string | null => {
     const refs = side === 'left' ? leftRefs.current : rightRefs.current;
     const occupiedIds = new Set(
@@ -497,21 +512,22 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
             const lineColor = leftItem ? getItemColor(leftItem.value).line : '#818cf8';
             return (
               <g key={`${leftId}-${rightId}`}>
-                {/* Sombra gruesa blanca detrás para dar relieve */}
+                {/* Sombra oscura para que la línea siempre se vea sobre fondos claros */}
                 <motion.line
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                   x1={coords.x1} y1={coords.y1}
                   x2={coords.x2} y2={coords.y2}
-                  stroke="white"
-                  strokeWidth={isNew ? 28 : 22}
+                  stroke="#312e81"
+                  strokeOpacity={0.35}
+                  strokeWidth={isNew ? 24 : 18}
                   strokeLinecap="round"
                 />
                 {/* Línea de color principal */}
                 <motion.line
                   initial={{ opacity: 0, strokeWidth: 0 }}
-                  animate={{ opacity: 1, strokeWidth: isNew ? 18 : 14 }}
+                  animate={{ opacity: 1, strokeWidth: isNew ? 16 : 12 }}
                   transition={{ duration: 0.3 }}
                   x1={coords.x1} y1={coords.y1}
                   x2={coords.x2} y2={coords.y2}
@@ -523,13 +539,13 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                 <motion.circle
                   initial={{ r: 0 }} animate={{ r: isNew ? 12 : 10 }}
                   cx={coords.x1} cy={coords.y1}
-                  fill={lineColor} stroke="white" strokeWidth="3"
+                  fill={lineColor} stroke="#312e81" strokeWidth="2.5"
                 />
                 {/* Punto de anclaje derecho */}
                 <motion.circle
                   initial={{ r: 0 }} animate={{ r: isNew ? 12 : 10 }}
                   cx={coords.x2} cy={coords.y2}
-                  fill={lineColor} stroke="white" strokeWidth="3"
+                  fill={lineColor} stroke="#312e81" strokeWidth="2.5"
                 />
               </g>
             );
@@ -542,9 +558,10 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
               <line
                 x1={coords.x1} y1={coords.y1}
                 x2={coords.x2} y2={coords.y2}
-                stroke="#a5b4fc"
-                strokeWidth="8"
-                strokeDasharray="16,10"
+                stroke="#4338ca"
+                strokeWidth="10"
+                strokeDasharray="14,8"
+                strokeOpacity="0.9"
                 strokeLinecap="round"
               />
             );
@@ -622,16 +639,17 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                     touchAction: 'none',
                   }}
                   className={`
-                    w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem]
-                    flex items-center justify-center text-4xl sm:text-5xl md:text-6xl
+                    w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-[2rem] md:rounded-[2.5rem]
+                    flex flex-col items-center justify-center gap-1 text-4xl sm:text-5xl md:text-6xl
                     border-4 cursor-pointer transition-colors relative
                   `}
                 >
                   {item.type === 'color' ? (
-                    <div className="w-2/3 h-2/3 rounded-full border-4 border-white/60" style={{ backgroundColor: item.value }} />
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-white/60" style={{ backgroundColor: item.value }} />
                   ) : (
-                    <span className="text-slate-800">{item.icon}</span>
+                    <span className="text-slate-800 leading-none">{item.icon}</span>
                   )}
+                  <span className="text-[11px] sm:text-sm font-black text-slate-700 leading-none">{item.label}</span>
                   {/* Checkmark cuando está conectado */}
                   {isConnected && !isFlashing && (
                     <motion.div
@@ -649,16 +667,18 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
           </div>
 
           {/* Etiqueta central */}
-          <div className="flex flex-col items-center gap-2 z-10">
-            {!draggingFrom && connectedPairs === 0 && (
+          <div className="flex flex-col items-center gap-2 z-10 px-2">
+            {connectedPairs < totalPairs && (
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
-                className="bg-white/90 rounded-2xl px-3 py-2 text-center shadow-lg border-2 border-indigo-100"
+                className="bg-white/95 rounded-2xl px-3 py-2 text-center shadow-lg border-2 border-indigo-100 max-w-[180px]"
               >
-                <span className="text-3xl">👈</span>
-                <p className="text-xs font-black text-indigo-500 uppercase mt-1">Arrastra</p>
-                <span className="text-3xl">👉</span>
+                <p className="text-[11px] sm:text-xs font-black text-indigo-500 uppercase leading-tight">
+                  {selectedTap
+                    ? 'Ahora toca su igual del otro lado'
+                    : 'Toca o arrastra para unir iguales'}
+                </p>
               </motion.div>
             )}
           </div>
@@ -697,16 +717,17 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                     touchAction: 'none',
                   }}
                   className={`
-                    w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem]
-                    flex items-center justify-center text-4xl sm:text-5xl md:text-6xl
-                    border-4 transition-colors relative
+                    w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-[2rem] md:rounded-[2.5rem]
+                    flex flex-col items-center justify-center gap-1 text-4xl sm:text-5xl md:text-6xl
+                    border-4 transition-colors relative cursor-pointer
                   `}
                 >
                   {item.type === 'color' ? (
-                    <div className="w-2/3 h-2/3 rounded-full border-4 border-white/60" style={{ backgroundColor: item.value }} />
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-white/60" style={{ backgroundColor: item.value }} />
                   ) : (
-                    <span className="text-slate-800">{item.displayIcon}</span>
+                    <span className="text-slate-800 leading-none">{item.displayIcon}</span>
                   )}
+                  <span className="text-[11px] sm:text-sm font-black text-slate-700 leading-none">{item.label}</span>
                   {isConnected && !isFlashing && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -789,7 +810,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
             exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-xl border-4 border-white"
           >
-            ❌ ¡Inténtalo otra vez!
+            ❌ ¡Ups! Busca el igual.
           </motion.div>
         )}
       </AnimatePresence>
