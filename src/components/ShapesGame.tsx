@@ -189,7 +189,7 @@ export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: (
               >
                 <shape.Icon 
                   strokeWidth={shape.thick ? 5 : 2.5}
-                  className={`w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 text-white drop-shadow-[0_8px_4px_rgba(0,0,0,0.2)] transition-all ${shape.isSolid ? 'fill-white' : 'fill-white/10 group-hover:fill-white/20'}`} 
+                  className={`w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 text-white drop-shadow-[0_10px_6px_rgba(0,0,0,0.2)] transition-all ${shape.isSolid ? 'fill-white' : 'fill-white/10 group-hover:fill-white/20'}`} 
                 />
               </motion.div>
 
