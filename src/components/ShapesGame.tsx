@@ -1,77 +1,77 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '../lib/speech';
-import { ArrowLeft, Shapes } from 'lucide-react';
+import { Circle, Square, Triangle, Star, Heart, Hexagon, Pentagon, Diamond, ArrowLeft, Shapes } from 'lucide-react';
 
 const CapsuleIcon = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M20,15 h60 a35,35 0 0,1 0,70 h-60 a35,35 0 0,1 0,-70 z" />
+    <path d="M30,25 h40 a20,20 0 0,1 0,50 h-40 a20,20 0 0,1 0,-50 z" />
   </svg>
 );
 
 const TrapezoidIcon = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M30,10 h40 a5,5 0 0,1 4.5,3 l20,75 a5,5 0 0,1 -4.5,7 h-80 a5,5 0 0,1 -4.5,-7 l20,-75 a5,5 0 0,1 4.5,-3 z" />
+    <path d="M35,30 h30 a5,5 0 0,1 4.5,3 l12,35 a5,5 0 0,1 -4.5,7 h-54 a5,5 0 0,1 -4.5,-7 l12,-35 a5,5 0 0,1 4.5,-3 z" />
   </svg>
 );
 
 const CrossIcon = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M35,5 h30 v30 h30 v30 h-30 v30 h-30 v-30 h-30 v-30 h30 z" />
+    <path d="M35,20 h30 v15 h15 v30 h-15 v15 h-30 v-15 h-15 v-30 h15 z" />
   </svg>
 );
 
 const ArchIcon = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M10,95 v-45 a40,40 0 0,1 80,0 v45 a5,5 0 0,1 -5,5 h-70 a5,5 0 0,1 -5,-5 z" />
+    <path d="M20,75 v-25 a30,30 0 0,1 60,0 v25 a5,5 0 0,1 -5,5 h-50 a5,5 0 0,1 -5,-5 z" />
   </svg>
 );
 
 const TriangleIsoIcon = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M50,5 a5,5 0 0,1 4.5,2.5 l42,82 a5,5 0 0,1 -4.5,7.5 h-84 a5,5 0 0,1 -4.5,-7.5 l42,-82 a5,5 0 0,1 4.5,-2.5 z" />
+    <path d="M50,20 a5,5 0 0,1 4.5,2.5 l30,52 a5,5 0 0,1 -4.5,7.5 h-60 a5,5 0 0,1 -4.5,-7.5 l30,-52 a5,5 0 0,1 4.5,-2.5 z" />
   </svg>
 );
 
 const DiamondIconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M50,5 L95,50 L50,95 L5,50 z" />
+    <path d="M50,20 L85,50 L50,80 L15,50 z" />
   </svg>
 );
 
 const BowtieIconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M10,40 a5,5 0 0,1 5,-5 h25 v-25 a5,5 0 0,1 5,-5 h10 a5,5 0 0,1 5,5 v25 h25 a5,5 0 0,1 5,5 v20 a5,5 0 0,1 -5,5 h-25 v25 a5,5 0 0,1 -5,5 h-10 a5,5 0 0,1 -5,-5 v-25 h-25 a5,5 0 0,1 -5,-5 z" />
+    <path d="M15,45 a3,3 0 0,1 3,-3 h20 v-10 a3,3 0 0,1 3,-3 h18 a3,3 0 0,1 3,3 v10 h20 a3,3 0 0,1 3,3 v15 a3,3 0 0,1 -3,3 h-20 v10 a3,3 0 0,1 -3,3 h-18 a3,3 0 0,1 -3,-3 v-10 h-20 a3,3 0 0,1 -3,-3 z" />
   </svg>
 );
 
 const MoonIconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M35,10 a40,40 0 1,0 0,80 L35,65 a15,15 0 0,1 0,-30 L35,10 z" />
+    <path d="M40,25 a25,25 0 1,0 0,50 L40,55 a6,6 0 0,1 0,-10 L40,25 z" />
   </svg>
 );
 
 const Star4IconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M50,2 Q58,42 98,50 Q58,58 50,98 Q42,58 2,50 Q42,42 50,2 z" />
+    <path d="M50,20 Q55,45 80,50 Q55,55 50,80 Q45,55 20,50 Q45,45 50,20 z" />
   </svg>
 );
 
 const CircleIconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <circle cx="50" cy="50" r="45" />
+    <circle cx="50" cy="50" r="35" />
   </svg>
 );
 
 const PuzzleIconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M10,15 h80 v20 a15,15 0 0,0 0,30 v20 h-80 v-20 a15,15 0 0,0 0,-30 v-20 z" />
+    <path d="M25,25 h50 v15 a10,10 0 0,0 0,20 v15 h-50 v-15 a10,10 0 0,0 0,-20 v-15 z" />
   </svg>
 );
 
 const TriangleBaseIcon = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M5,95 h90 L50,5 z" />
+    <path d="M10,75 h80 L50,25 z" />
   </svg>
 );
 
@@ -180,16 +180,16 @@ export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: (
 
               {/* Contenedor del Icono */}
               <motion.div
-                animate={activeShape === shape.name ? { 
+                animate={activeShape === shape.name ? {
                   scale: [1, 1.2, 0.9, 1.1, 1],
                   rotate: [0, 10, -10, 5, 0]
                 } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="relative z-10 mb-8 md:mb-12"
               >
-                <shape.Icon 
+                <shape.Icon
                   strokeWidth={shape.thick ? 5 : 2.5}
-                  className={`w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 text-white drop-shadow-[0_10px_6px_rgba(0,0,0,0.2)] transition-all fill-white`} 
+                  className={`w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 text-white drop-shadow-[0_10px_6px_rgba(0,0,0,0.2)] transition-all ${shape.isSolid ? 'fill-white' : 'fill-white/10 group-hover:fill-white/20'}`}
                 />
               </motion.div>
 
