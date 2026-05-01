@@ -47,7 +47,7 @@ const BowtieIconCustom = (props: any) => (
 
 const MoonIconCustom = (props: any) => (
   <svg {...props} viewBox="0 0 100 100" fill="currentColor">
-    <path d="M50,20 A30,30 0 1,0 50,80 A35,35 0 0,1 50,20" />
+    <path d="M40,25 a25,25 0 1,0 0,50 L40,55 a6,6 0 0,1 0,-10 L40,25 z" />
   </svg>
 );
 

@@ -279,7 +279,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
 
     Object.entries(refs).forEach(([id, el]) => {
       if (!el || occupiedIds.has(id)) return;
-      const rect = el.getBoundingClientRect();
+      const rect = (el as HTMLElement).getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
       const d = Math.hypot(clientX - cx, clientY - cy);
