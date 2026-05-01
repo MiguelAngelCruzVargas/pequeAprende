@@ -3,79 +3,91 @@ import { motion } from 'motion/react';
 import { speak } from '../lib/speech';
 import { Circle, Square, Triangle, Star, Heart, Hexagon, Pentagon, Diamond, ArrowLeft, Shapes } from 'lucide-react';
 
+const CapsuleIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M30,25 h40 a20,20 0 0,1 0,50 h-40 a20,20 0 0,1 0,-50 z" />
+  </svg>
+);
+
 const TrapezoidIcon = (props: any) => (
-  <svg
-    {...props}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-  >
-    <path d="M7 6h10l4 12H3l4-12z" />
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M35,30 h30 a5,5 0 0,1 4.5,3 l12,35 a5,5 0 0,1 -4.5,7 h-54 a5,5 0 0,1 -4.5,-7 l12,-35 a5,5 0 0,1 4.5,-3 z" />
   </svg>
 );
 
 const CrossIcon = (props: any) => (
-  <svg
-    {...props}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-  >
-    <path d="M6.34 4.93L12 10.59l5.66-5.66 1.41 1.41L13.41 12l5.66 5.66-1.41 1.41L12 13.41l-5.66 5.66-1.41-1.41L10.59 12 4.93 6.34z" />
-  </svg>
-);
-
-const CapsuleIcon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    <rect x="7" y="3" width="10" height="18" rx="5" />
-  </svg>
-);
-
-const BowtieIcon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M3 7h18l-4 5 4 5H3l4-5-4-5z" />
-  </svg>
-);
-
-const PetalIcon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C12 2 6 11 6 16.5a6 6 0 0 0 12 0C18 11 12 2 12 2z" />
-  </svg>
-);
-
-const Star4Icon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2l2 8 8 2-8 2-2 8-2-8-8-2 8-2 2-8z" />
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M35,20 h30 v15 h15 v30 h-15 v15 h-30 v-15 h-15 v-30 h15 z" />
   </svg>
 );
 
 const ArchIcon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M5 21V10a7 7 0 0 1 14 0v11H5z" />
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M20,75 v-25 a30,30 0 0,1 60,0 v25 a5,5 0 0,1 -5,5 h-50 a5,5 0 0,1 -5,-5 z" />
   </svg>
 );
 
-const PuzzleIcon = (props: any) => (
-  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M20 12a3 3 0 0 0-3-3h-1V7a3 3 0 0 0-6 0v2H9a3 3 0 0 0 0 6h1v2a3 3 0 0 0 6 0v-2h1a3 3 0 0 0 3-3z" />
+const TriangleIsoIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M50,20 a5,5 0 0,1 4.5,2.5 l30,52 a5,5 0 0,1 -4.5,7.5 h-60 a5,5 0 0,1 -4.5,-7.5 l30,-52 a5,5 0 0,1 4.5,-2.5 z" />
+  </svg>
+);
+
+const DiamondIconCustom = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M50,20 L85,50 L50,80 L15,50 z" />
+  </svg>
+);
+
+const BowtieIconCustom = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M15,45 a3,3 0 0,1 3,-3 h20 v-10 a3,3 0 0,1 3,-3 h18 a3,3 0 0,1 3,3 v10 h20 a3,3 0 0,1 3,3 v15 a3,3 0 0,1 -3,3 h-20 v10 a3,3 0 0,1 -3,3 h-18 a3,3 0 0,1 -3,-3 v-10 h-20 a3,3 0 0,1 -3,-3 z" />
+  </svg>
+);
+
+const MoonIconCustom = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M50,20 A30,30 0 1,0 50,80 A35,35 0 0,1 50,20" />
+  </svg>
+);
+
+const Star4IconCustom = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M50,20 Q55,45 80,50 Q55,55 50,80 Q45,55 20,50 Q45,45 50,20 z" />
+  </svg>
+);
+
+const CircleIconCustom = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <circle cx="50" cy="50" r="35" />
+  </svg>
+);
+
+const PuzzleIconCustom = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M25,25 h50 v15 a10,10 0 0,0 0,20 v15 h-50 v-15 a10,10 0 0,0 0,-20 v-15 z" />
+  </svg>
+);
+
+const TriangleBaseIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M10,75 h80 L50,25 z" />
   </svg>
 );
 
 const shapes = [
-  { name: 'Círculo', Icon: Circle, bg: 'bg-blue-600', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]' },
-  { name: 'Cuadrado', Icon: Square, bg: 'bg-green-500', shadow: 'shadow-[0_12px_0_#14532d]', activeShadow: 'active:shadow-[0_0px_0_#14532d]' },
-  { name: 'Triángulo', Icon: Triangle, bg: 'bg-red-500', shadow: 'shadow-[0_12px_0_#7f1d1d]', activeShadow: 'active:shadow-[0_0px_0_#7f1d1d]' },
-  { name: 'Estrella', Icon: Star, bg: 'bg-sky-400', shadow: 'shadow-[0_12px_0_#0c4a6e]', activeShadow: 'active:shadow-[0_0px_0_#0c4a6e]' },
-  { name: 'Hexágono', Icon: Hexagon, bg: 'bg-emerald-500', shadow: 'shadow-[0_12px_0_#064e3b]', activeShadow: 'active:shadow-[0_0px_0_#064e3b]' },
-  { name: 'Pentágono', Icon: Pentagon, bg: 'bg-yellow-400', shadow: 'shadow-[0_12px_0_#713f12]', activeShadow: 'active:shadow-[0_0px_0_#713f12]' },
-  { name: 'Rombo', Icon: Diamond, bg: 'bg-amber-500', shadow: 'shadow-[0_12px_0_#78350f]', activeShadow: 'active:shadow-[0_0px_0_#78350f]' },
-  { name: 'X', Icon: CrossIcon, bg: 'bg-blue-500', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]', isSolid: true },
-  { name: 'Pajarita', Icon: BowtieIcon, bg: 'bg-purple-500', shadow: 'shadow-[0_12px_0_#581c87]', activeShadow: 'active:shadow-[0_0px_0_#581c87]', isSolid: true },
-  { name: 'Pétalo', Icon: PetalIcon, bg: 'bg-rose-400', shadow: 'shadow-[0_12px_0_#9f1239]', activeShadow: 'active:shadow-[0_0px_0_#9f1239]', isSolid: true },
-  { name: 'Estrella 4', Icon: Star4Icon, bg: 'bg-yellow-300', shadow: 'shadow-[0_12px_0_#a16207]', activeShadow: 'active:shadow-[0_0px_0_#a16207]', isSolid: true },
   { name: 'Cápsula', Icon: CapsuleIcon, bg: 'bg-indigo-400', shadow: 'shadow-[0_12px_0_#3730a3]', activeShadow: 'active:shadow-[0_0px_0_#3730a3]', isSolid: true },
-  { name: 'Arco', Icon: ArchIcon, bg: 'bg-cyan-500', shadow: 'shadow-[0_12px_0_#164e63]', activeShadow: 'active:shadow-[0_0px_0_#164e63]', isSolid: true },
-  { name: 'Pieza', Icon: PuzzleIcon, bg: 'bg-lime-500', shadow: 'shadow-[0_12px_0_#365314]', activeShadow: 'active:shadow-[0_0px_0_#365314]', isSolid: true },
   { name: 'Trapecio', Icon: TrapezoidIcon, bg: 'bg-orange-500', shadow: 'shadow-[0_12px_0_#9a3412]', activeShadow: 'active:shadow-[0_0px_0_#9a3412]', isSolid: true },
-  { name: 'Corazón', Icon: Heart, bg: 'bg-pink-500', shadow: 'shadow-[0_12px_0_#831843]', activeShadow: 'active:shadow-[0_0px_0_#831843]' },
+  { name: 'Cruz', Icon: CrossIcon, bg: 'bg-blue-500', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]', isSolid: true },
+  { name: 'Arco', Icon: ArchIcon, bg: 'bg-cyan-500', shadow: 'shadow-[0_12px_0_#164e63]', activeShadow: 'active:shadow-[0_0px_0_#164e63]', isSolid: true },
+  { name: 'Triángulo', Icon: TriangleIsoIcon, bg: 'bg-red-500', shadow: 'shadow-[0_12px_0_#7f1d1d]', activeShadow: 'active:shadow-[0_0px_0_#7f1d1d]', isSolid: true },
+  { name: 'Diamante', Icon: DiamondIconCustom, bg: 'bg-amber-500', shadow: 'shadow-[0_12px_0_#78350f]', activeShadow: 'active:shadow-[0_0px_0_#78350f]', isSolid: true },
+  { name: 'Pajarita', Icon: BowtieIconCustom, bg: 'bg-purple-500', shadow: 'shadow-[0_12px_0_#581c87]', activeShadow: 'active:shadow-[0_0px_0_#581c87]', isSolid: true },
+  { name: 'Luna', Icon: MoonIconCustom, bg: 'bg-slate-400', shadow: 'shadow-[0_12px_0_#334155]', activeShadow: 'active:shadow-[0_0px_0_#334155]', isSolid: true },
+  { name: 'Estrella 4', Icon: Star4IconCustom, bg: 'bg-yellow-300', shadow: 'shadow-[0_12px_0_#a16207]', activeShadow: 'active:shadow-[0_0px_0_#a16207]', isSolid: true },
+  { name: 'Círculo', Icon: CircleIconCustom, bg: 'bg-blue-600', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]', isSolid: true },
+  { name: 'Pieza', Icon: PuzzleIconCustom, bg: 'bg-lime-500', shadow: 'shadow-[0_12px_0_#365314]', activeShadow: 'active:shadow-[0_0px_0_#365314]', isSolid: true },
+  { name: 'Triángulo Base', Icon: TriangleBaseIcon, bg: 'bg-emerald-500', shadow: 'shadow-[0_12px_0_#064e3b]', activeShadow: 'active:shadow-[0_0px_0_#064e3b]', isSolid: true },
 ];
 
 export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: () => void, isFirstTime: boolean, onVisit: () => void }) {
