@@ -46,7 +46,7 @@ export default function ColoringGame({ onBack, isFirstTime, onVisit }: { onBack:
           }
           ctx.lineJoin = 'round';
           ctx.lineCap = 'round';
-          ctx.lineWidth = 16; // Trazo grueso para los deditos
+          ctx.lineWidth = 8; // Trazo más fino
         }
       }
     };
@@ -126,7 +126,7 @@ export default function ColoringGame({ onBack, isFirstTime, onVisit }: { onBack:
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-rose-50 via-pink-50 to-red-50 font-sans select-none">
+    <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-rose-50 via-pink-50 to-red-50 font-sans select-none touch-none">
 
       {/* HEADER COMPACTO Y ESTANDARIZADO */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-1.5 bg-white shadow-sm rounded-b-2xl border-b-2 border-white">
