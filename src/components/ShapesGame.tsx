@@ -23,6 +23,42 @@ const CrossIcon = (props: any) => (
   </svg>
 );
 
+const CapsuleIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <rect x="7" y="3" width="10" height="18" rx="5" />
+  </svg>
+);
+
+const BowtieIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 7h18l-4 5 4 5H3l4-5-4-5z" />
+  </svg>
+);
+
+const PetalIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C12 2 6 11 6 16.5a6 6 0 0 0 12 0C18 11 12 2 12 2z" />
+  </svg>
+);
+
+const Star4Icon = (props: any) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l2 8 8 2-8 2-2 8-2-8-8-2 8-2 2-8z" />
+  </svg>
+);
+
+const ArchIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M5 21V10a7 7 0 0 1 14 0v11H5z" />
+  </svg>
+);
+
+const PuzzleIcon = (props: any) => (
+  <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20 12a3 3 0 0 0-3-3h-1V7a3 3 0 0 0-6 0v2H9a3 3 0 0 0 0 6h1v2a3 3 0 0 0 6 0v-2h1a3 3 0 0 0 3-3z" />
+  </svg>
+);
+
 const shapes = [
   { name: 'Círculo', Icon: Circle, bg: 'bg-blue-600', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]' },
   { name: 'Cuadrado', Icon: Square, bg: 'bg-green-500', shadow: 'shadow-[0_12px_0_#14532d]', activeShadow: 'active:shadow-[0_0px_0_#14532d]' },
@@ -32,6 +68,12 @@ const shapes = [
   { name: 'Pentágono', Icon: Pentagon, bg: 'bg-yellow-400', shadow: 'shadow-[0_12px_0_#713f12]', activeShadow: 'active:shadow-[0_0px_0_#713f12]' },
   { name: 'Rombo', Icon: Diamond, bg: 'bg-amber-500', shadow: 'shadow-[0_12px_0_#78350f]', activeShadow: 'active:shadow-[0_0px_0_#78350f]' },
   { name: 'X', Icon: CrossIcon, bg: 'bg-blue-500', shadow: 'shadow-[0_12px_0_#1e3a8a]', activeShadow: 'active:shadow-[0_0px_0_#1e3a8a]', isSolid: true },
+  { name: 'Pajarita', Icon: BowtieIcon, bg: 'bg-purple-500', shadow: 'shadow-[0_12px_0_#581c87]', activeShadow: 'active:shadow-[0_0px_0_#581c87]', isSolid: true },
+  { name: 'Pétalo', Icon: PetalIcon, bg: 'bg-rose-400', shadow: 'shadow-[0_12px_0_#9f1239]', activeShadow: 'active:shadow-[0_0px_0_#9f1239]', isSolid: true },
+  { name: 'Estrella 4', Icon: Star4Icon, bg: 'bg-yellow-300', shadow: 'shadow-[0_12px_0_#a16207]', activeShadow: 'active:shadow-[0_0px_0_#a16207]', isSolid: true },
+  { name: 'Cápsula', Icon: CapsuleIcon, bg: 'bg-indigo-400', shadow: 'shadow-[0_12px_0_#3730a3]', activeShadow: 'active:shadow-[0_0px_0_#3730a3]', isSolid: true },
+  { name: 'Arco', Icon: ArchIcon, bg: 'bg-cyan-500', shadow: 'shadow-[0_12px_0_#164e63]', activeShadow: 'active:shadow-[0_0px_0_#164e63]', isSolid: true },
+  { name: 'Pieza', Icon: PuzzleIcon, bg: 'bg-lime-500', shadow: 'shadow-[0_12px_0_#365314]', activeShadow: 'active:shadow-[0_0px_0_#365314]', isSolid: true },
   { name: 'Trapecio', Icon: TrapezoidIcon, bg: 'bg-orange-500', shadow: 'shadow-[0_12px_0_#9a3412]', activeShadow: 'active:shadow-[0_0px_0_#9a3412]', isSolid: true },
   { name: 'Corazón', Icon: Heart, bg: 'bg-pink-500', shadow: 'shadow-[0_12px_0_#831843]', activeShadow: 'active:shadow-[0_0px_0_#831843]' },
 ];

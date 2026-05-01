@@ -36,6 +36,12 @@ const ITEM_COLORS: Record<string, { bg: string; border: string; shadow: string; 
   flower: { bg: '#fdf2f8', border: '#e879f9', shadow: '#86198f', line: '#d946ef' },
   diamond: { bg: '#ecfdf5', border: '#34d399', shadow: '#065f46', line: '#10b981' },
   rainbow: { bg: '#fdf4ff', border: '#c084fc', shadow: '#7e22ce', line: '#a855f7' },
+  bowtie: { bg: '#f3e8ff', border: '#a855f7', shadow: '#581c87', line: '#7e22ce' },
+  petal: { bg: '#fff1f2', border: '#fb7185', shadow: '#9f1239', line: '#e11d48' },
+  star4: { bg: '#fefce8', border: '#facc15', shadow: '#a16207', line: '#eab308' },
+  capsule: { bg: '#e0e7ff', border: '#818cf8', shadow: '#3730a3', line: '#4f46e5' },
+  arch: { bg: '#ecfeff', border: '#22d3ee', shadow: '#164e63', line: '#0891b2' },
+  puzzle: { bg: '#f7fee7', border: '#a3e635', shadow: '#365314', line: '#65a30d' },
   dog: { bg: '#fff7ed', border: '#fb923c', shadow: '#c2410c', line: '#f97316' },
   cat: { bg: '#fef3c7', border: '#fbbf24', shadow: '#b45309', line: '#f59e0b' },
   fish: { bg: '#e0f2fe', border: '#38bdf8', shadow: '#0369a1', line: '#0ea5e9' },
@@ -64,6 +70,12 @@ const SHAPES = [
   { id: 's10', type: 'shape', value: 'flower', label: 'Flor', icon: '🌸' },
   { id: 's11', type: 'shape', value: 'diamond', label: 'Diamante', icon: '💎' },
   { id: 's12', type: 'shape', value: 'rainbow', label: 'Arcoíris', icon: '🌈' },
+  { id: 's13', type: 'shape', value: 'bowtie', label: 'Pajarita', icon: '🎀' },
+  { id: 's14', type: 'shape', value: 'petal', label: 'Pétalo', icon: '💧' },
+  { id: 's15', type: 'shape', value: 'star4', label: 'Estrella 4', icon: '✦' },
+  { id: 's16', type: 'shape', value: 'capsule', label: 'Cápsula', icon: '💊' },
+  { id: 's17', type: 'shape', value: 'arch', label: 'Arco', icon: '⛩️' },
+  { id: 's18', type: 'shape', value: 'puzzle', label: 'Pieza', icon: '🧩' },
 ];
 
 const COLORS = [
