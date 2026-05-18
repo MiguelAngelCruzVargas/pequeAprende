@@ -24,6 +24,7 @@ import ColoringGame from './components/ColoringGame';
 import BubblesGame from './components/BubblesGame';
 import ConnectGame from './components/ConnectGame';
 import AIToggle from './components/AIToggle';
+import TraceGame from './components/TraceGame';
 import { AIProvider, useAI } from './lib/aiContext';
 
 // Mapeo con el sistema Premium de Sombras 3D
@@ -41,12 +42,13 @@ const menuItems = [
   { id: 'soundguess', label: 'Sonidos', emoji: '👂', gradient: 'from-yellow-400 to-orange-500', shadow: 'shadow-[0_10px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]', category: 'Habla' },
   { id: 'bubbles', label: 'Burbujas', emoji: '🫧', gradient: 'from-cyan-300 to-blue-500', shadow: 'shadow-[0_10px_0_#1D4ED8]', activeShadow: 'active:shadow-[0_0px_0_#1D4ED8]', category: 'Habla' },
   { id: 'connect', label: 'Conecta', emoji: '🔗', gradient: 'from-indigo-400 to-purple-600', shadow: 'shadow-[0_10px_0_#4338CA]', activeShadow: 'active:shadow-[0_0px_0_#4338CA]', category: 'Aprender' },
+  { id: 'trace', label: 'Trazos', emoji: '✍️', gradient: 'from-amber-400 to-orange-500', shadow: 'shadow-[0_10px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]', category: 'Aprender' },
 ];
 
 const APP_STORAGE_KEY = 'peque_app_state_v1';
 const ALL_SCREENS: GameScreen[] = [
   'welcome', 'menu', 'colors', 'numbers', 'vowels', 'animals', 'reasoning',
-  'shapes', 'matching', 'nameit', 'repeat', 'soundguess', 'coloring', 'bubbles', 'connect',
+  'shapes', 'matching', 'nameit', 'repeat', 'soundguess', 'coloring', 'bubbles', 'connect', 'trace',
 ];
 
 const GAME_IDS = new Set(menuItems.map(item => item.id));
@@ -173,6 +175,7 @@ function App() {
       case 'coloring': return <ColoringGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('coloring')} onVisit={() => markAsVisited('coloring')} />;
       case 'bubbles': return <BubblesGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('bubbles')} onVisit={() => markAsVisited('bubbles')} />;
       case 'connect': return <ConnectGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('connect')} onVisit={() => markAsVisited('connect')} />;
+      case 'trace': return <TraceGame onBack={() => handleSetScreen('menu')} isFirstTime={!visitedGames.has('trace')} onVisit={() => markAsVisited('trace')} />;
       default: return null;
     }
   };

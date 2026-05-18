@@ -41,6 +41,7 @@ interface AIContextValue {
   mode: AIMode;               // current mode
   isEnabled: boolean;         // is AI active right now?
   isLimitReached: boolean;    // daily quota hit?
+  isOnline: boolean;          // is internet connection active?
   dailyCount: number;         // how many AI calls today
   dailyLimit: number;         // soft limit value
   toggleAI: () => void;       // manual toggle
@@ -57,9 +58,31 @@ export function AIProvider({ children }: { children: ReactNode }) {
     catch { return true; }
   });
   const [quota, setQuota] = useState<DailyQuota>(loadQuota);
+  const [isOnline, setIsOnline] = useState<boolean>(() => 
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  // Monitor network online/offline state
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Initial sync
+    setIsOnline(navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const isLimitReached = quota.count >= DAILY_SOFT_LIMIT;
-  const isEnabled = manuallyEnabled && !isLimitReached;
+  const isEnabled = manuallyEnabled && !isLimitReached && isOnline;
   const mode: AIMode = isEnabled ? 'ai' : 'normal';
 
   // Persist manual toggle
@@ -95,6 +118,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
       mode,
       isEnabled,
       isLimitReached,
+      isOnline,
       dailyCount: quota.count,
       dailyLimit: DAILY_SOFT_LIMIT,
       toggleAI,
