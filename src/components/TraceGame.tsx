@@ -16,9 +16,20 @@ const BRUSH_COLORS = [
   { name: 'Verde', value: '#22C55E', class: 'bg-green-500', shadow: 'shadow-[0_6px_0_#15803D]' },
 ];
 
+const SHAPE_NAMES: Record<string, string> = {
+  '◯': 'el círculo',
+  '□': 'el cuadrado',
+  '△': 'el triángulo',
+  '☆': 'la estrella',
+  '♡': 'el corazón',
+  '◇': 'el rombo',
+  '☾': 'la luna'
+};
+
 const TARGETS = {
   vowels: ['A', 'E', 'I', 'O', 'U'],
-  numbers: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+  numbers: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+  shapes: ['◯', '□', '△', '☆', '♡', '◇', '☾']
 };
 
 interface Particle {
@@ -37,7 +48,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const hueRef = useRef<number>(0);
   const { isEnabled: aiEnabled, recordUsage } = useAI();
 
-  const [activeTab, setActiveTab] = useState<'vowels' | 'numbers'>('vowels');
+  const [activeTab, setActiveTab] = useState<'vowels' | 'numbers' | 'shapes'>('vowels');
   const [selectedChar, setSelectedChar] = useState('A');
   const [brushColor, setBrushColor] = useState(BRUSH_COLORS[0]); // default Mágico
   const [isEraser, setIsEraser] = useState(false);
@@ -244,18 +255,37 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     setIsEraser(false);
     
     // Hablar la instrucción
-    const itemPrefix = activeTab === 'vowels' ? 'la letra' : 'el número';
-    speak(`¡Vamos a dibujar ${itemPrefix} ${char}!`);
-    setOwlMessage(`Sigue los puntitos con tu dedito para dibujar ${itemPrefix} ${char}.`);
+    let itemPrefix = '';
+    let spokenText = '';
+    
+    if (activeTab === 'vowels') {
+      itemPrefix = 'la letra';
+      spokenText = `¡Vamos a dibujar la letra ${char}!`;
+      setOwlMessage(`Sigue los puntitos con tu dedito para dibujar la letra ${char}.`);
+    } else if (activeTab === 'numbers') {
+      itemPrefix = 'el número';
+      spokenText = `¡Vamos a dibujar el número ${char}!`;
+      setOwlMessage(`Sigue los puntitos con tu dedito para dibujar el número ${char}.`);
+    } else if (activeTab === 'shapes') {
+      itemPrefix = SHAPE_NAMES[char] || 'la figura';
+      spokenText = `¡Vamos a dibujar ${itemPrefix}!`;
+      setOwlMessage(`Sigue los puntitos con tu dedito para dibujar ${itemPrefix}.`);
+    }
+    
+    speak(spokenText);
   };
 
-  const handleTabChange = (tab: 'vowels' | 'numbers') => {
+  const handleTabChange = (tab: 'vowels' | 'numbers' | 'shapes') => {
     setActiveTab(tab);
     const nextChar = TARGETS[tab][0];
     setSelectedChar(nextChar);
     setIsEraser(false);
 
-    const introText = tab === 'vowels' ? 'las vocales' : 'los números';
+    let introText = '';
+    if (tab === 'vowels') introText = 'las vocales';
+    else if (tab === 'numbers') introText = 'los números';
+    else if (tab === 'shapes') introText = 'las figuras';
+
     speak(`¡Ahora dibujemos ${introText}!`);
     setOwlMessage(`Elige uno de los botones de arriba y dibújalo en la pizarra.`);
   };
@@ -284,7 +314,8 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     setIsChecking(true);
     setOwlMessage('Mirando tu dibujo...');
     
-    const wordPrefix = activeTab === 'vowels' ? 'letra' : 'número';
+    const wordPrefix = activeTab === 'vowels' ? 'letra' : activeTab === 'numbers' ? 'número' : 'figura';
+    const targetName = activeTab === 'shapes' ? (SHAPE_NAMES[selectedChar] || selectedChar) : selectedChar;
 
     // Voz inmediata del tutor indicando que está analizando
     speak('¡A ver, a ver! Deja que mire tu hermoso dibujo...');
@@ -296,7 +327,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     if (aiEnabled) {
       try {
         const response = await askAI(
-          `El niño está jugando a trazar con su dedito la ${wordPrefix} "${selectedChar}" sobre un lienzo con una plantilla punteada. Analiza su dibujo y dile algo extremadamente cariñoso, alentador y divertido en español de máximo 2 oraciones. ¡Felicítalo mucho por su esfuerzo!`,
+          `El niño está jugando a trazar con su dedito la ${wordPrefix} "${targetName}" sobre un lienzo con una plantilla punteada. Analiza su dibujo y dile algo extremadamente cariñoso, alentador y divertido en español de máximo 2 oraciones. ¡Felicítalo mucho por su esfuerzo!`,
           {
             provider: 'auto',
             context: { game: 'trace', item: selectedChar },
@@ -325,8 +356,9 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const localFeedbackFallback = () => {
     triggerCelebrationParticles();
     
+    const targetName = activeTab === 'shapes' ? (SHAPE_NAMES[selectedChar] || selectedChar) : selectedChar;
     const congrats = [
-      `¡Guau! ¡Te quedó precioso! Has dibujado la ${activeTab === 'vowels' ? 'letra' : 'cifra'} ${selectedChar} muy bien. ¡Eres un gran artista! 🌟`,
+      `¡Guau! ¡Te quedó precioso! Has dibujado ${activeTab === 'vowels' ? 'la letra' : activeTab === 'numbers' ? 'el número' : 'la figura'} ${targetName} muy bien. ¡Eres un gran artista! 🌟`,
       `¡Increíble! ¡Qué bonito trazo! Sigue así, lo haces súper bien. 🎉`,
       `¡Qué hermoso te ha quedado! ¡Eres muy inteligente! ¿Hacemos otro? 💖`
     ];
@@ -357,11 +389,11 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
           </div>
         </div>
 
-        {/* Control de pestañas (Vocales vs Números) con estilo 3D */}
-        <div className="flex gap-1.5 bg-slate-100 p-1 rounded-full border border-slate-200 shadow-inner">
+        {/* Control de pestañas (Vocales, Números, Figuras) con estilo 3D */}
+        <div className="flex gap-1 bg-slate-100 p-0.5 rounded-full border border-slate-200 shadow-inner">
           <button
             onClick={() => handleTabChange('vowels')}
-            className={`px-3 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
+            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
               activeTab === 'vowels'
                 ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
                 : 'text-slate-500 hover:text-slate-700'
@@ -371,13 +403,23 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
           </button>
           <button
             onClick={() => handleTabChange('numbers')}
-            className={`px-3 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
+            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
               activeTab === 'numbers'
                 ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             🔢 Números
+          </button>
+          <button
+            onClick={() => handleTabChange('shapes')}
+            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
+              activeTab === 'shapes'
+                ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            🔷 Figuras
           </button>
         </div>
 
