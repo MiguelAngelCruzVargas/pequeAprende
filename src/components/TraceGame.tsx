@@ -8,6 +8,7 @@ import { askAI, classifyAIError } from '../lib/ai';
 
 // Colores gomita para pintar
 const BRUSH_COLORS = [
+  { name: 'Mágico', value: 'rainbow', class: 'bg-gradient-to-tr from-pink-400 via-yellow-400 to-cyan-400 animate-pulse', shadow: 'shadow-[0_6px_0_#64748B]' },
   { name: 'Morado', value: '#A855F7', class: 'bg-purple-500', shadow: 'shadow-[0_6px_0_#7E22CE]' },
   { name: 'Rosa', value: '#EC4899', class: 'bg-pink-500', shadow: 'shadow-[0_6px_0_#BE185D]' },
   { name: 'Azul', value: '#3B82F6', class: 'bg-blue-500', shadow: 'shadow-[0_6px_0_#1D4ED8]' },
@@ -31,11 +32,14 @@ interface Particle {
 
 export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: () => void; isFirstTime: boolean; onVisit: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lastX = useRef<number | null>(null);
+  const lastY = useRef<number | null>(null);
+  const hueRef = useRef<number>(0);
   const { isEnabled: aiEnabled, recordUsage } = useAI();
 
   const [activeTab, setActiveTab] = useState<'vowels' | 'numbers'>('vowels');
   const [selectedChar, setSelectedChar] = useState('A');
-  const [brushColor, setBrushColor] = useState(BRUSH_COLORS[0]); // default Morado
+  const [brushColor, setBrushColor] = useState(BRUSH_COLORS[0]); // default Mágico
   const [isEraser, setIsEraser] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
 
@@ -57,6 +61,29 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       speak('¡Vamos a dibujar las vocales y los números!');
     }
   }, [isFirstTime, onVisit]);
+
+  // Prevenir gestos de zoom táctil y rebote de página en iPad/iOS Safari
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const preventDefault = (e: TouchEvent) => {
+      // Bloquea el desplazamiento del dedo sobre el canvas en Safari
+      if (e.touches.length <= 1) {
+        e.preventDefault();
+      }
+    };
+
+    canvas.addEventListener('touchstart', preventDefault, { passive: false });
+    canvas.addEventListener('touchmove', preventDefault, { passive: false });
+    canvas.addEventListener('touchend', preventDefault, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', preventDefault);
+      canvas.removeEventListener('touchmove', preventDefault);
+      canvas.removeEventListener('touchend', preventDefault);
+    };
+  }, []);
 
   // Redibujar la plantilla cuando cambie el carácter seleccionado, pestaña, o tamaño
   useEffect(() => {
@@ -88,19 +115,18 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // 1. Dibujar relleno ultra suave (fucsia/azul pastel) para guiar la forma
-    ctx.fillStyle = '#F8FAFC';
+    // 1. Dibujar relleno suave (celeste pastel) para guiar la forma
+    ctx.fillStyle = '#F0F9FF';
     ctx.fillText(char, width / 2, height / 2 + size * 0.05);
 
-    // 2. Dibujar contorno punteado (Línea discontinua)
-    ctx.strokeStyle = '#CBD5E1'; // Gris suave pero visible
-    ctx.lineWidth = 8;
+    // 2. Dibujar contorno punteado (Línea discontinua celeste)
+    ctx.strokeStyle = '#93C5FD'; // Celeste claro de alta visibilidad para niños
+    ctx.lineWidth = 6;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.setLineDash([16, 16]); // Punteado grande e infantil
+    ctx.setLineDash([12, 12]); // Punteado grande e infantil
     ctx.strokeText(char, width / 2, height / 2 + size * 0.05);
 
-    // 3. Dibujar estrellita guía al inicio de cada trazo de manera ilustrativa
     ctx.restore();
   };
 
@@ -110,60 +136,96 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     const parent = canvas.parentElement;
     if (!parent) return;
 
-    // Ajustar dimensiones del canvas físicamente al contenedor
-    canvas.width = parent.clientWidth;
-    canvas.height = parent.clientHeight;
+    const rect = parent.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    // Dimensionar físicamente el canvas por el pixel ratio (Retina / High-DPI)
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    // Fijar el tamaño en píxeles CSS
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
+      // Escalar todas las operaciones de dibujo
+      ctx.scale(dpr, dpr);
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
-      ctx.lineWidth = 16; // Trazo grueso ideal para dedos de niños
-      drawTemplate(ctx, canvas.width, canvas.height, selectedChar);
+      ctx.lineWidth = 20; // Pincel más grueso ideal para niños
+      drawTemplate(ctx, rect.width, rect.height, selectedChar);
     }
   };
 
-  // Dibujo en Canvas con PointerEvents
+  // Dibujo en Canvas con PointerEvents optimizado segment-by-segment (O(1))
   const startDrawing = (x: number, y: number) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
     setIsDrawing(true);
+    lastX.current = x;
+    lastY.current = y;
+
+    // Dibujar un círculo al inicio del toque
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x, y);
-
-    ctx.strokeStyle = isEraser ? '#ffffff' : brushColor.value;
-    ctx.lineWidth = isEraser ? 36 : 16; // Borrador más grueso que el pincel
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.setLineDash([]); // Dibujo continuo, quitar el punteado de la plantilla
-
-    ctx.stroke();
+    const brushWidth = isEraser ? 36 : 20;
+    ctx.arc(x, y, brushWidth / 2, 0, Math.PI * 2);
+    
+    if (isEraser) {
+      ctx.fillStyle = '#ffffff';
+    } else if (brushColor.value === 'rainbow') {
+      ctx.fillStyle = `hsl(${hueRef.current}, 95%, 60%)`;
+      hueRef.current = (hueRef.current + 5) % 360;
+    } else {
+      ctx.fillStyle = brushColor.value;
+    }
+    
+    ctx.fill();
     ctx.restore();
   };
 
   const draw = (x: number, y: number) => {
-    if (!isDrawing) return;
+    if (!isDrawing || lastX.current === null || lastY.current === null) return;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
     ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(lastX.current, lastY.current);
     ctx.lineTo(x, y);
-    ctx.strokeStyle = isEraser ? '#ffffff' : brushColor.value;
-    ctx.lineWidth = isEraser ? 36 : 16;
+
+    const brushWidth = isEraser ? 36 : 20;
+
+    if (isEraser) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = brushWidth;
+    } else if (brushColor.value === 'rainbow') {
+      ctx.strokeStyle = `hsl(${hueRef.current}, 95%, 60%)`;
+      hueRef.current = (hueRef.current + 5) % 360; // Desplazamiento suave de tono
+      ctx.lineWidth = brushWidth;
+    } else {
+      ctx.strokeStyle = brushColor.value;
+      ctx.lineWidth = brushWidth;
+    }
+
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.setLineDash([]);
     ctx.stroke();
     ctx.restore();
+
+    lastX.current = x;
+    lastY.current = y;
   };
 
   const stopDrawing = () => {
     setIsDrawing(false);
+    lastX.current = null;
+    lastY.current = null;
   };
 
   const getCoordinates = (e: React.PointerEvent) => {
@@ -171,7 +233,6 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     
-    // Soporte multipunto / multitáctil (extraer el primer puntero)
     return {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
