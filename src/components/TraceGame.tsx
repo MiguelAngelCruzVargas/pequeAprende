@@ -271,7 +271,8 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const [isGuided, setIsGuided] = useState(true);
   const [currentStrokeIndex, setCurrentStrokeIndex] = useState(0);
   const [completedStrokes, setCompletedStrokes] = useState<Stroke[]>([]);
-  const [currentStrokePoints, setCurrentStrokePoints] = useState<Point[]>([]);
+  const [currentDrawnPoints, setCurrentDrawnPoints] = useState<Point[]>([]);
+  const [completedDrawnPaths, setCompletedDrawnPaths] = useState<Point[][]>([]);
   const [visitedIndices, setVisitedIndices] = useState<number[]>([]);
   const [showNextButton, setShowNextButton] = useState(false);
   const [drawingPointer, setDrawingPointer] = useState<Point | null>(null);
@@ -286,7 +287,8 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const resetGuidedState = () => {
     setCurrentStrokeIndex(0);
     setCompletedStrokes([]);
-    setCurrentStrokePoints([]);
+    setCompletedDrawnPaths([]);
+    setCurrentDrawnPoints([]);
     setVisitedIndices([]);
     setShowNextButton(false);
     setDrawingPointer(null);
@@ -466,14 +468,14 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       ctx.restore();
     });
 
-    // 3. Dibujar los trazos ya completados por el niño
-    completedStrokes.forEach((stroke) => {
-      if (stroke.length < 2) return;
+    // 3. Dibujar los trazos ya completados por el niño (su dibujo real freehand)
+    completedDrawnPaths.forEach((path) => {
+      if (path.length < 2) return;
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(scaleX(stroke[0].x), scaleY(stroke[0].y));
-      for (let i = 1; i < stroke.length; i++) {
-        ctx.lineTo(scaleX(stroke[i].x), scaleY(stroke[i].y));
+      ctx.moveTo(scaleX(path[0].x), scaleY(path[0].y));
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(scaleX(path[i].x), scaleY(path[i].y));
       }
       ctx.strokeStyle = '#10B981'; // Verde esmeralda premium
       ctx.lineWidth = 24;
@@ -483,17 +485,13 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       ctx.restore();
     });
 
-    // 4. Dibujar el trazo actual en proceso (conectando puntos de control ya visitados)
-    if (currentStrokePoints.length > 0) {
+    // 4. Dibujar el trazo actual en proceso (dibujo real freehand del dedo)
+    if (currentDrawnPoints.length > 0) {
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(scaleX(currentStrokePoints[0].x), scaleY(currentStrokePoints[0].y));
-      for (let i = 1; i < currentStrokePoints.length; i++) {
-        ctx.lineTo(scaleX(currentStrokePoints[i].x), scaleY(currentStrokePoints[i].y));
-      }
-      // Conectar con la posición actual del puntero si está arrastrando
-      if (drawingPointer) {
-        ctx.lineTo(drawingPointer.x, drawingPointer.y);
+      ctx.moveTo(scaleX(currentDrawnPoints[0].x), scaleY(currentDrawnPoints[0].y));
+      for (let i = 1; i < currentDrawnPoints.length; i++) {
+        ctx.lineTo(scaleX(currentDrawnPoints[i].x), scaleY(currentDrawnPoints[i].y));
       }
       ctx.strokeStyle = brushColor.value === 'rainbow' ? '#F43F5E' : brushColor.value;
       ctx.lineWidth = 20;
@@ -555,7 +553,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     animId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isGuided, completedStrokes, currentStrokePoints, visitedIndices, currentStrokeIndex, selectedChar, activeTab, brushColor, drawingPointer]);
+  }, [isGuided, completedDrawnPaths, currentDrawnPoints, visitedIndices, currentStrokeIndex, selectedChar, activeTab, brushColor, drawingPointer]);
 
   // Dibujo en Canvas con PointerEvents optimizado segment-by-segment (O(1))
   const startDrawing = (x: number, y: number) => {
@@ -816,7 +814,10 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       // Iniciar trazo guiado desde el punto tocado
       setIsDrawing(true);
       setVisitedIndices([matchedIndex]);
-      setCurrentStrokePoints([activeStroke[matchedIndex]]);
+      
+      const normX = (x / width) * 100;
+      const normY = (y / height) * 100;
+      setCurrentDrawnPoints([{ x: normX, y: normY }]);
       setDrawingPointer({ x, y });
       speak('¡Eso es! Sigue las estrellas.');
     } else {
@@ -868,14 +869,18 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     if (minDist > 85) {
       // Se desvió demasiado del camino de la letra
       setIsDrawing(false);
-      setCurrentStrokePoints([]);
+      setCurrentDrawnPoints([]);
       setVisitedIndices([]);
       setDrawingPointer(null);
       speak('¡Uy! Te saliste del camino.');
       return;
     }
 
-    // Actualizar la posición del puntero
+    // Registrar el punto de dibujo freehand del niño
+    const normX = (x / width) * 100;
+    const normY = (y / height) * 100;
+    const newPoints = [...currentDrawnPoints, { x: normX, y: normY }];
+    setCurrentDrawnPoints(newPoints);
     setDrawingPointer({ x, y });
 
     // Comprobar si tocó un punto que aún no ha sido visitado
@@ -887,17 +892,16 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
         
         if (dist < 50) {
           const nextVisited = [...visitedIndices, i];
-          const updatedPoints = [...currentStrokePoints, activeStroke[i]];
           setVisitedIndices(nextVisited);
-          setCurrentStrokePoints(updatedPoints);
           triggerPointSparkParticles(ptX, ptY);
 
           // Verificar si ya completó todos los puntos de este trazo
           if (nextVisited.length === activeStroke.length) {
+            setCompletedDrawnPaths((prev) => [...prev, newPoints]);
             const nextCompleted = [...completedStrokes, activeStroke];
             setCompletedStrokes(nextCompleted);
             setIsDrawing(false);
-            setCurrentStrokePoints([]);
+            setCurrentDrawnPoints([]);
             setVisitedIndices([]);
             setDrawingPointer(null);
 
@@ -923,7 +927,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     // MODO GUIADO
     if (isDrawing) {
       setIsDrawing(false);
-      setCurrentStrokePoints([]);
+      setCurrentDrawnPoints([]);
       setVisitedIndices([]);
       setDrawingPointer(null);
       speak('Inténtalo de nuevo.');
