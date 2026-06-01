@@ -272,7 +272,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const [currentStrokeIndex, setCurrentStrokeIndex] = useState(0);
   const [completedStrokes, setCompletedStrokes] = useState<Stroke[]>([]);
   const [currentStrokePoints, setCurrentStrokePoints] = useState<Point[]>([]);
-  const [nextControlPointIndex, setNextControlPointIndex] = useState(1);
+  const [visitedIndices, setVisitedIndices] = useState<number[]>([]);
   const [showNextButton, setShowNextButton] = useState(false);
   const [drawingPointer, setDrawingPointer] = useState<Point | null>(null);
 
@@ -287,7 +287,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     setCurrentStrokeIndex(0);
     setCompletedStrokes([]);
     setCurrentStrokePoints([]);
-    setNextControlPointIndex(1);
+    setVisitedIndices([]);
     setShowNextButton(false);
     setDrawingPointer(null);
   };
@@ -509,17 +509,15 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       activeStroke.forEach((pt, i) => {
         const px = scaleX(pt.x);
         const py = scaleY(pt.y);
-        const isReached = i < nextControlPointIndex;
+        const isReached = visitedIndices.includes(i);
 
         ctx.save();
         ctx.beginPath();
         ctx.arc(px, py, 14, 0, Math.PI * 2);
         if (isReached) {
           ctx.fillStyle = '#10B981'; // Verde completado
-        } else if (i === nextControlPointIndex) {
-          ctx.fillStyle = '#EAB308'; // Siguiente a alcanzar (Amarillo)
         } else {
-          ctx.fillStyle = '#94A3B8'; // Gris futuros
+          ctx.fillStyle = '#EAB308'; // Amarillo activo/pendiente
         }
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
@@ -527,18 +525,8 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
         ctx.stroke();
         ctx.restore();
 
-        // Bandera de salida en el primer punto si no ha empezado el trazo
-        if (i === 0 && currentStrokePoints.length === 0) {
-          ctx.save();
-          ctx.font = '22px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('🏁', px, py - 2);
-          ctx.restore();
-        }
-
-        // Estrella latente en el punto siguiente a alcanzar
-        if (i === nextControlPointIndex) {
+        // Estrella latente en los puntos no alcanzados
+        if (!isReached) {
           ctx.save();
           ctx.font = '26px sans-serif';
           ctx.textAlign = 'center';
@@ -567,7 +555,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     animId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isGuided, completedStrokes, currentStrokePoints, nextControlPointIndex, currentStrokeIndex, selectedChar, activeTab, brushColor, drawingPointer]);
+  }, [isGuided, completedStrokes, currentStrokePoints, visitedIndices, currentStrokeIndex, selectedChar, activeTab, brushColor, drawingPointer]);
 
   // Dibujo en Canvas con PointerEvents optimizado segment-by-segment (O(1))
   const startDrawing = (x: number, y: number) => {
@@ -806,28 +794,39 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     const activeStroke = strokes[currentStrokeIndex];
     if (!activeStroke) return;
 
-    // El primer punto del trazo activo
-    const startPt = activeStroke[0];
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const width = canvas.width / (window.devicePixelRatio || 1);
     const height = canvas.height / (window.devicePixelRatio || 1);
-    const startX = (startPt.x * width) / 100;
-    const startY = (startPt.y * height) / 100;
 
-    const dist = Math.hypot(x - startX, y - startY);
-    if (dist < 60) {
-      // Iniciar trazo guiado
+    // Buscar si el niño tocó cerca de CUALQUIER punto de control del trazo activo
+    let matchedIndex = -1;
+    for (let i = 0; i < activeStroke.length; i++) {
+      const ptX = (activeStroke[i].x * width) / 100;
+      const ptY = (activeStroke[i].y * height) / 100;
+      const dist = Math.hypot(x - ptX, y - ptY);
+      if (dist < 60) {
+        matchedIndex = i;
+        break;
+      }
+    }
+
+    if (matchedIndex !== -1) {
+      // Iniciar trazo guiado desde el punto tocado
       setIsDrawing(true);
-      setCurrentStrokePoints([startPt]);
-      setNextControlPointIndex(1);
+      setVisitedIndices([matchedIndex]);
+      setCurrentStrokePoints([activeStroke[matchedIndex]]);
       setDrawingPointer({ x, y });
-      speak('¡Eso es! Sigue la estrella.');
+      speak('¡Eso es! Sigue las estrellas.');
     } else {
-      // Destello o aviso de que empiece en el punto verde
-      speak('Empieza en la bandera.');
-      triggerPulseParticles(startX, startY);
+      // Avisar y hacer brillar los puntos
+      speak('Toca una estrella para empezar a dibujar.');
+      activeStroke.forEach((pt) => {
+        const px = (pt.x * width) / 100;
+        const py = (pt.y * height) / 100;
+        triggerPulseParticles(px, py);
+      });
     }
   };
 
@@ -851,66 +850,65 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     const width = canvas.width / (window.devicePixelRatio || 1);
     const height = canvas.height / (window.devicePixelRatio || 1);
 
-    // Punto de control anterior (último alcanzado) y siguiente a alcanzar
-    const prevPt = activeStroke[nextControlPointIndex - 1];
-    const nextPt = activeStroke[nextControlPointIndex];
-    if (!nextPt || !prevPt) return;
+    // Validar desviación del camino
+    let minDist = Infinity;
+    for (let k = 0; k < activeStroke.length - 1; k++) {
+      const ptA = activeStroke[k];
+      const ptB = activeStroke[k + 1];
+      const ax = (ptA.x * width) / 100;
+      const ay = (ptA.y * height) / 100;
+      const bx = (ptB.x * width) / 100;
+      const by = (ptB.y * height) / 100;
+      const d = distToSegment({ x, y }, { x: ax, y: ay }, { x: bx, y: by });
+      if (d < minDist) {
+        minDist = d;
+      }
+    }
 
-    const nextX = (nextPt.x * width) / 100;
-    const nextY = (nextPt.y * height) / 100;
-
-    // Calcular distancia al siguiente punto de control
-    const distToNext = Math.hypot(x - nextX, y - nextY);
-
-    // Calcular distancia de la posición actual del dedo al segmento para evitar desviarse
-    const prevX = (prevPt.x * width) / 100;
-    const prevY = (prevPt.y * height) / 100;
-    
-    // Distancia al segmento en píxeles
-    const distToSeg = distToSegment(
-      { x, y },
-      { x: prevX, y: prevY },
-      { x: nextX, y: nextY }
-    );
-
-    if (distToSeg > 75) {
-      // Se desvió demasiado del camino
+    if (minDist > 85) {
+      // Se desvió demasiado del camino de la letra
       setIsDrawing(false);
       setCurrentStrokePoints([]);
-      setNextControlPointIndex(1);
+      setVisitedIndices([]);
       setDrawingPointer(null);
       speak('¡Uy! Te saliste del camino.');
       return;
     }
 
-    // Actualizar la posición visual del puntero
+    // Actualizar la posición del puntero
     setDrawingPointer({ x, y });
 
-    if (distToNext < 50) {
-      // Llegó al siguiente punto de control!
-      const updatedPoints = [...currentStrokePoints, nextPt];
-      setCurrentStrokePoints(updatedPoints);
-      
-      triggerPointSparkParticles(nextX, nextY);
+    // Comprobar si tocó un punto que aún no ha sido visitado
+    for (let i = 0; i < activeStroke.length; i++) {
+      if (!visitedIndices.includes(i)) {
+        const ptX = (activeStroke[i].x * width) / 100;
+        const ptY = (activeStroke[i].y * height) / 100;
+        const dist = Math.hypot(x - ptX, y - ptY);
+        
+        if (dist < 50) {
+          const nextVisited = [...visitedIndices, i];
+          const updatedPoints = [...currentStrokePoints, activeStroke[i]];
+          setVisitedIndices(nextVisited);
+          setCurrentStrokePoints(updatedPoints);
+          triggerPointSparkParticles(ptX, ptY);
 
-      if (nextControlPointIndex + 1 < activeStroke.length) {
-        setNextControlPointIndex(nextControlPointIndex + 1);
-      } else {
-        // Trazo completo!
-        const nextCompleted = [...completedStrokes, activeStroke];
-        setCompletedStrokes(nextCompleted);
-        setIsDrawing(false);
-        setCurrentStrokePoints([]);
-        setDrawingPointer(null);
+          // Verificar si ya completó todos los puntos de este trazo
+          if (nextVisited.length === activeStroke.length) {
+            const nextCompleted = [...completedStrokes, activeStroke];
+            setCompletedStrokes(nextCompleted);
+            setIsDrawing(false);
+            setCurrentStrokePoints([]);
+            setVisitedIndices([]);
+            setDrawingPointer(null);
 
-        if (currentStrokeIndex + 1 < strokes.length) {
-          // Hay más trazos en este carácter
-          setCurrentStrokeIndex(currentStrokeIndex + 1);
-          setNextControlPointIndex(1);
-          speak('¡Bien hecho! Sigue el siguiente trazo.');
-        } else {
-          // Carácter completado por completo!
-          handleCharacterCompleted();
+            if (currentStrokeIndex + 1 < strokes.length) {
+              setCurrentStrokeIndex(currentStrokeIndex + 1);
+              speak('¡Bien hecho! Sigue el siguiente trazo.');
+            } else {
+              handleCharacterCompleted();
+            }
+          }
+          break;
         }
       }
     }
@@ -926,7 +924,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     if (isDrawing) {
       setIsDrawing(false);
       setCurrentStrokePoints([]);
-      setNextControlPointIndex(1);
+      setVisitedIndices([]);
       setDrawingPointer(null);
       speak('Inténtalo de nuevo.');
     }
