@@ -32,13 +32,226 @@ const TARGETS = {
   shapes: ['◯', '□', '△', '☆', '♡', '◇', '☾']
 };
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+type Stroke = Point[];
+
+const TRACE_PATHS: Record<string, Stroke[]> = {
+  // Vocales
+  'A': [
+    [{ x: 50, y: 15 }, { x: 25, y: 85 }], // Trazo 1: diagonal izquierda
+    [{ x: 50, y: 15 }, { x: 75, y: 85 }], // Trazo 2: diagonal derecha
+    [{ x: 33, y: 55 }, { x: 67, y: 55 }]  // Trazo 3: barra media
+  ],
+  'E': [
+    [{ x: 70, y: 15 }, { x: 30, y: 15 }, { x: 30, y: 85 }, { x: 70, y: 85 }], // Trazo 1: barra sup, espina, barra inf
+    [{ x: 30, y: 50 }, { x: 60, y: 50 }]                                      // Trazo 2: barra central
+  ],
+  'I': [
+    [{ x: 30, y: 15 }, { x: 70, y: 15 }], // Trazo 1: barra superior
+    [{ x: 50, y: 15 }, { x: 50, y: 85 }], // Trazo 2: línea vertical
+    [{ x: 30, y: 85 }, { x: 70, y: 85 }]  // Trazo 3: barra inferior
+  ],
+  'O': [
+    [
+      { x: 50, y: 15 }, 
+      { x: 75, y: 22 }, 
+      { x: 85, y: 50 }, 
+      { x: 75, y: 78 }, 
+      { x: 50, y: 85 }, 
+      { x: 25, y: 78 }, 
+      { x: 15, y: 50 }, 
+      { x: 25, y: 22 }, 
+      { x: 50, y: 15 }
+    ] // Trazo 1: círculo completo
+  ],
+  'U': [
+    [
+      { x: 25, y: 15 },
+      { x: 25, y: 55 },
+      { x: 30, y: 78 },
+      { x: 50, y: 85 },
+      { x: 70, y: 78 },
+      { x: 75, y: 55 },
+      { x: 75, y: 15 }
+    ] // Trazo 1: curva de la U
+  ],
+  // Números
+  '0': [
+    [
+      { x: 50, y: 15 }, 
+      { x: 75, y: 22 }, 
+      { x: 85, y: 50 }, 
+      { x: 75, y: 78 }, 
+      { x: 50, y: 85 }, 
+      { x: 25, y: 78 }, 
+      { x: 15, y: 50 }, 
+      { x: 25, y: 22 }, 
+      { x: 50, y: 15 }
+    ]
+  ],
+  '1': [
+    [{ x: 35, y: 35 }, { x: 50, y: 15 }], // Ganchito
+    [{ x: 50, y: 15 }, { x: 50, y: 85 }], // Línea vertical
+    [{ x: 30, y: 85 }, { x: 70, y: 85 }]  // Base
+  ],
+  '2': [
+    [
+      { x: 28, y: 30 }, 
+      { x: 38, y: 16 }, 
+      { x: 62, y: 16 }, 
+      { x: 72, y: 30 }, 
+      { x: 72, y: 45 }, 
+      { x: 30, y: 85 }
+    ], // Curva superior y diagonal
+    [{ x: 30, y: 85 }, { x: 72, y: 85 }]  // Base horizontal
+  ],
+  '3': [
+    [{ x: 30, y: 20 }, { x: 70, y: 20 }, { x: 50, y: 48 }], // Bucle superior
+    [{ x: 50, y: 48 }, { x: 72, y: 62 }, { x: 68, y: 82 }, { x: 45, y: 85 }, { x: 30, y: 78 }] // Bucle inferior
+  ],
+  '4': [
+    [{ x: 60, y: 15 }, { x: 25, y: 60 }, { x: 75, y: 60 }], // L vertical-diagonal-horizontal
+    [{ x: 60, y: 40 }, { x: 60, y: 85 }]  // Cruz vertical
+  ],
+  '5': [
+    [{ x: 35, y: 15 }, { x: 35, y: 45 }, { x: 65, y: 52 }, { x: 65, y: 78 }, { x: 50, y: 85 }, { x: 35, y: 78 }], // Espina y bucle
+    [{ x: 35, y: 15 }, { x: 65, y: 15 }]  // Techo
+  ],
+  '6': [
+    [
+      { x: 65, y: 15 }, 
+      { x: 42, y: 32 }, 
+      { x: 30, y: 55 }, 
+      { x: 35, y: 80 }, 
+      { x: 65, y: 80 }, 
+      { x: 70, y: 60 }, 
+      { x: 55, y: 48 }, 
+      { x: 35, y: 55 }
+    ] // Espiral y círculo inferior
+  ],
+  '7': [
+    [{ x: 30, y: 15 }, { x: 70, y: 15 }, { x: 45, y: 85 }], // Techo y diagonal
+    [{ x: 37, y: 50 }, { x: 57, y: 50 }]  // Barra horizontal
+  ],
+  '8': [
+    [
+      { x: 50, y: 50 }, 
+      { x: 30, y: 32 }, 
+      { x: 50, y: 15 }, 
+      { x: 70, y: 32 }, 
+      { x: 50, y: 50 }, 
+      { x: 30, y: 68 }, 
+      { x: 50, y: 85 }, 
+      { x: 70, y: 68 }, 
+      { x: 50, y: 50 }
+    ] // Ocho continuo
+  ],
+  '9': [
+    [
+      { x: 68, y: 50 }, 
+      { x: 42, y: 50 }, 
+      { x: 32, y: 32 }, 
+      { x: 50, y: 15 }, 
+      { x: 68, y: 32 }, 
+      { x: 68, y: 85 }
+    ] // Cabeza redonda y cola vertical
+  ],
+  '10': [
+    // El 1
+    [{ x: 20, y: 35 }, { x: 30, y: 15 }, { x: 30, y: 85 }],
+    // El 0
+    [
+      { x: 65, y: 15 }, 
+      { x: 78, y: 22 }, 
+      { x: 85, y: 50 }, 
+      { x: 78, y: 78 }, 
+      { x: 65, y: 85 }, 
+      { x: 52, y: 78 }, 
+      { x: 45, y: 50 }, 
+      { x: 52, y: 22 }, 
+      { x: 65, y: 15 }
+    ]
+  ],
+  // Figuras
+  '◯': [
+    [
+      { x: 50, y: 15 }, 
+      { x: 75, y: 25 }, 
+      { x: 85, y: 50 }, 
+      { x: 75, y: 75 }, 
+      { x: 50, y: 85 }, 
+      { x: 25, y: 75 }, 
+      { x: 15, y: 50 }, 
+      { x: 25, y: 25 }, 
+      { x: 50, y: 15 }
+    ]
+  ],
+  '□': [
+    [{ x: 20, y: 20 }, { x: 80, y: 20 }, { x: 80, y: 80 }, { x: 20, y: 80 }, { x: 20, y: 20 }]
+  ],
+  '△': [
+    [{ x: 50, y: 15 }, { x: 80, y: 85 }, { x: 20, y: 85 }, { x: 50, y: 15 }]
+  ],
+  '☆': [
+    [
+      { x: 50, y: 15 }, 
+      { x: 61, y: 38 }, 
+      { x: 86, y: 38 }, 
+      { x: 66, y: 53 }, 
+      { x: 73, y: 79 }, 
+      { x: 50, y: 63 }, 
+      { x: 27, y: 79 }, 
+      { x: 34, y: 53 }, 
+      { x: 14, y: 38 }, 
+      { x: 39, y: 38 }, 
+      { x: 50, y: 15 }
+    ]
+  ],
+  '♡': [
+    [
+      { x: 50, y: 30 }, 
+      { x: 35, y: 15 }, 
+      { x: 15, y: 30 }, 
+      { x: 20, y: 55 }, 
+      { x: 50, y: 85 }, 
+      { x: 80, y: 55 }, 
+      { x: 85, y: 30 }, 
+      { x: 65, y: 15 }, 
+      { x: 50, y: 30 }
+    ]
+  ],
+  '◇': [
+    [{ x: 50, y: 15 }, { x: 80, y: 50 }, { x: 50, y: 85 }, { x: 20, y: 50 }, { x: 50, y: 15 }]
+  ],
+  '☾': [
+    [
+      { x: 35, y: 15 }, 
+      { x: 60, y: 25 }, 
+      { x: 70, y: 50 }, 
+      { x: 60, y: 75 }, 
+      { x: 35, y: 85 }, 
+      { x: 50, y: 72 }, 
+      { x: 55, y: 50 }, 
+      { x: 50, y: 28 }, 
+      { x: 35, y: 15 }
+    ]
+  ]
+};
+
 interface Particle {
   id: number;
   emoji: string;
+  startX: number;
+  startY: number;
   x: number;
   y: number;
   scale: number;
   rotate: number;
+  duration?: number;
 }
 
 export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: () => void; isFirstTime: boolean; onVisit: () => void }) {
@@ -54,6 +267,15 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const [isEraser, setIsEraser] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
 
+  // Estados para el modo guiado
+  const [isGuided, setIsGuided] = useState(true);
+  const [currentStrokeIndex, setCurrentStrokeIndex] = useState(0);
+  const [completedStrokes, setCompletedStrokes] = useState<Stroke[]>([]);
+  const [currentStrokePoints, setCurrentStrokePoints] = useState<Point[]>([]);
+  const [nextControlPointIndex, setNextControlPointIndex] = useState(1);
+  const [showNextButton, setShowNextButton] = useState(false);
+  const [drawingPointer, setDrawingPointer] = useState<Point | null>(null);
+
   // Estados de IA y tutor
   const [owlMessage, setOwlMessage] = useState('¡Vamos a trazar letras y números! Toca una arriba para empezar.');
   const [isChecking, setIsChecking] = useState(false);
@@ -61,12 +283,30 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
   const hasSpoken = useRef(false);
 
+  const resetGuidedState = () => {
+    setCurrentStrokeIndex(0);
+    setCompletedStrokes([]);
+    setCurrentStrokePoints([]);
+    setNextControlPointIndex(1);
+    setShowNextButton(false);
+    setDrawingPointer(null);
+  };
+
+  // Función matemática de apoyo: distancia de un punto p a un segmento v-w
+  const distToSegment = (p: Point, v: Point, w: Point) => {
+    const l2 = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
+    if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+    let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+  };
+
   // Inicialización de voz al entrar
   useEffect(() => {
     if (hasSpoken.current) return;
     hasSpoken.current = true;
     if (isFirstTime) {
-      speak('¡Trazos mágicos! Con tu dedito, sigue la línea punteada para dibujar.');
+      speak('¡Trazos mágicos! Con tu dedito, sigue el camino para dibujar.');
       onVisit();
     } else {
       speak('¡Vamos a dibujar las vocales y los números!');
@@ -96,11 +336,12 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     };
   }, []);
 
-  // Redibujar la plantilla cuando cambie el carácter seleccionado, pestaña, o tamaño
+  // Redibujar la plantilla cuando cambie el carácter seleccionado, pestaña, tamaño o modo
   useEffect(() => {
+    resetGuidedState();
     resetCanvas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedChar, activeTab]);
+  }, [selectedChar, activeTab, isGuided]);
 
   // Configurar el canvas y el listener para reajustes
   useEffect(() => {
@@ -111,7 +352,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedChar]);
+  }, [selectedChar, activeTab, isGuided]);
 
   const drawTemplate = (ctx: CanvasRenderingContext2D, width: number, height: number, char: string) => {
     ctx.save();
@@ -165,9 +406,168 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       ctx.lineWidth = 20; // Pincel más grueso ideal para niños
-      drawTemplate(ctx, rect.width, rect.height, selectedChar);
+      if (!isGuided) {
+        drawTemplate(ctx, rect.width, rect.height, selectedChar);
+      }
     }
   };
+
+  const redraw = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width / (window.devicePixelRatio || 1);
+    const height = canvas.height / (window.devicePixelRatio || 1);
+
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
+
+    if (!isGuided) {
+      ctx.restore();
+      return;
+    }
+
+    // 1. Rellenar de blanco el fondo
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    const strokes = TRACE_PATHS[selectedChar] || [];
+    const scaleX = (val: number) => (val * width) / 100;
+    const scaleY = (val: number) => (val * height) / 100;
+
+    // 2. Dibujar las carreteras guías (todas las del carácter)
+    strokes.forEach((stroke) => {
+      if (stroke.length < 2) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(scaleX(stroke[0].x), scaleY(stroke[0].y));
+      for (let i = 1; i < stroke.length; i++) {
+        ctx.lineTo(scaleX(stroke[i].x), scaleY(stroke[i].y));
+      }
+      // Dibujar carretera base gris suave
+      ctx.strokeStyle = '#F1F5F9';
+      ctx.lineWidth = 55;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Contorno interno un poco más oscuro
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.lineWidth = 45;
+      ctx.stroke();
+
+      // Línea discontinua central
+      ctx.strokeStyle = '#93C5FD';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([12, 16]);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // 3. Dibujar los trazos ya completados por el niño
+    completedStrokes.forEach((stroke) => {
+      if (stroke.length < 2) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(scaleX(stroke[0].x), scaleY(stroke[0].y));
+      for (let i = 1; i < stroke.length; i++) {
+        ctx.lineTo(scaleX(stroke[i].x), scaleY(stroke[i].y));
+      }
+      ctx.strokeStyle = '#10B981'; // Verde esmeralda premium
+      ctx.lineWidth = 24;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // 4. Dibujar el trazo actual en proceso (conectando puntos de control ya visitados)
+    if (currentStrokePoints.length > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(scaleX(currentStrokePoints[0].x), scaleY(currentStrokePoints[0].y));
+      for (let i = 1; i < currentStrokePoints.length; i++) {
+        ctx.lineTo(scaleX(currentStrokePoints[i].x), scaleY(currentStrokePoints[i].y));
+      }
+      // Conectar con la posición actual del puntero si está arrastrando
+      if (drawingPointer) {
+        ctx.lineTo(drawingPointer.x, drawingPointer.y);
+      }
+      ctx.strokeStyle = brushColor.value === 'rainbow' ? '#F43F5E' : brushColor.value;
+      ctx.lineWidth = 20;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 5. Dibujar los puntos de control del trazo activo
+    const activeStroke = strokes[currentStrokeIndex];
+    if (activeStroke) {
+      activeStroke.forEach((pt, i) => {
+        const px = scaleX(pt.x);
+        const py = scaleY(pt.y);
+        const isReached = i < nextControlPointIndex;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(px, py, 14, 0, Math.PI * 2);
+        if (isReached) {
+          ctx.fillStyle = '#10B981'; // Verde completado
+        } else if (i === nextControlPointIndex) {
+          ctx.fillStyle = '#EAB308'; // Siguiente a alcanzar (Amarillo)
+        } else {
+          ctx.fillStyle = '#94A3B8'; // Gris futuros
+        }
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+
+        // Bandera de salida en el primer punto si no ha empezado el trazo
+        if (i === 0 && currentStrokePoints.length === 0) {
+          ctx.save();
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('🏁', px, py - 2);
+          ctx.restore();
+        }
+
+        // Estrella latente en el punto siguiente a alcanzar
+        if (i === nextControlPointIndex) {
+          ctx.save();
+          ctx.font = '26px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const time = Date.now() / 200;
+          const scale = 1.0 + Math.sin(time) * 0.15;
+          ctx.translate(px, py);
+          ctx.scale(scale, scale);
+          ctx.fillText('⭐', 0, -2);
+          ctx.restore();
+        }
+      });
+    }
+
+    ctx.restore();
+  };
+
+  // Loop de redibujado de animación en modo guiado
+  useEffect(() => {
+    if (!isGuided) return;
+    let animId: number;
+    const loop = () => {
+      redraw();
+      animId = requestAnimationFrame(loop);
+    };
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGuided, completedStrokes, currentStrokePoints, nextControlPointIndex, currentStrokeIndex, selectedChar, activeTab, brushColor, drawingPointer]);
 
   // Dibujo en Canvas con PointerEvents optimizado segment-by-segment (O(1))
   const startDrawing = (x: number, y: number) => {
@@ -290,20 +690,246 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     setOwlMessage(`Elige uno de los botones de arriba y dibújalo en la pizarra.`);
   };
 
-  // Burst de partículas tipo confeti al adivinar/comprobar
+  // Burst de partículas tipo confeti al adivinar/comprobar o completar trazo
   const triggerCelebrationParticles = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
     const emojis = ['🌟', '✨', '🎉', '🍎', '🐱', '🎨', '🚀', '💖', '🧸', '🌈'];
-    const newParticles: Particle[] = Array.from({ length: 15 }).map((_, i) => ({
+    const newParticles: Particle[] = Array.from({ length: 20 }).map((_, i) => ({
       id: Date.now() + i,
       emoji: emojis[Math.floor(Math.random() * emojis.length)],
-      x: Math.random() * 80 - 40, // offset del centro
-      y: Math.random() * 60 - 30,
-      scale: Math.random() * 0.8 + 0.6,
+      startX: centerX,
+      startY: centerY,
+      x: Math.random() * 300 - 150, // offset del centro
+      y: Math.random() * 200 - 180, // volar hacia arriba
+      scale: Math.random() * 1.0 + 0.8,
       rotate: Math.random() * 360,
+      duration: 2.2,
     }));
     setParticles(newParticles);
-    // Eliminar las partículas después de 2 segundos
-    setTimeout(() => setParticles([]), 2200);
+    // Eliminar las partículas después de 2.3 segundos
+    setTimeout(() => setParticles([]), 2300);
+  };
+
+  // Pequeñas chispas al alcanzar un punto de control
+  const triggerPointSparkParticles = (px: number, py: number) => {
+    const emojis = ['✨', '⭐', '💫', '🌟', '🎨'];
+    const newParticles: Particle[] = Array.from({ length: 6 }).map((_, i) => ({
+      id: Date.now() + i + 100,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      startX: px,
+      startY: py,
+      x: Math.random() * 80 - 40,
+      y: Math.random() * 80 - 40,
+      scale: Math.random() * 0.6 + 0.5,
+      rotate: Math.random() * 180,
+      duration: 1.0,
+    }));
+    setParticles((prev) => [...prev, ...newParticles]);
+    // Limpiar chispas después de 1.1s
+    setTimeout(() => {
+      setParticles((prev) => prev.filter((p) => p.duration !== 1.0));
+    }, 1100);
+  };
+
+  // Pulso de advertencia en caso de toque fallido
+  const triggerPulseParticles = (px: number, py: number) => {
+    const newParticles: Particle[] = [{
+      id: Date.now() + 500,
+      emoji: '⭕',
+      startX: px,
+      startY: py,
+      x: 0,
+      y: 0,
+      scale: 2.5,
+      rotate: 0,
+      duration: 0.8,
+    }];
+    setParticles((prev) => [...prev, ...newParticles]);
+    setTimeout(() => {
+      setParticles((prev) => prev.filter((p) => p.id !== newParticles[0].id));
+    }, 900);
+  };
+
+  const handleCharacterCompleted = () => {
+    triggerCelebrationParticles();
+    
+    // Felicitar
+    const targetName = activeTab === 'shapes' ? (SHAPE_NAMES[selectedChar] || selectedChar) : selectedChar;
+    const isVowel = activeTab === 'vowels';
+    const isNumber = activeTab === 'numbers';
+    const prefix = isVowel ? 'la letra' : isNumber ? 'el número' : 'la figura';
+
+    const congratulations = [
+      `¡Increíble! Has trazado ${prefix} ${targetName} perfectamente. ¡Eres una estrella! ⭐`,
+      `¡Qué hermoso dibujo! Completaste ${prefix} ${targetName} muy bien. ¡Súper inteligente! 🎉`,
+      `¡Bravo! Lograste dibujar ${prefix} ${targetName}. ¡Excelente trabajo! 💖`
+    ];
+
+    const message = congratulations[Math.floor(Math.random() * congratulations.length)];
+    setOwlMessage(message);
+    speak(message);
+
+    setShowNextButton(true);
+  };
+
+  const handleNextCharacter = () => {
+    setShowNextButton(false);
+    const targetList = TARGETS[activeTab];
+    const currentIndex = targetList.indexOf(selectedChar);
+    if (currentIndex !== -1 && currentIndex + 1 < targetList.length) {
+      // Pasar al siguiente carácter
+      const nextChar = targetList[currentIndex + 1];
+      handleSelectChar(nextChar);
+    } else {
+      // Llegó al final de la categoría
+      speak('¡Felicidades! Completaste todos los trazos de esta lista. ¡Elige otra arriba!');
+      setOwlMessage('¡Eres increíble! Has terminado todos los trazos. Elige otra categoría arriba.');
+      resetGuidedState();
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    const { x, y } = getCoordinates(e);
+
+    if (!isGuided) {
+      startDrawing(x, y);
+      return;
+    }
+
+    // MODO GUIADO
+    const strokes = TRACE_PATHS[selectedChar] || [];
+    const activeStroke = strokes[currentStrokeIndex];
+    if (!activeStroke) return;
+
+    // El primer punto del trazo activo
+    const startPt = activeStroke[0];
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const width = canvas.width / (window.devicePixelRatio || 1);
+    const height = canvas.height / (window.devicePixelRatio || 1);
+    const startX = (startPt.x * width) / 100;
+    const startY = (startPt.y * height) / 100;
+
+    const dist = Math.hypot(x - startX, y - startY);
+    if (dist < 60) {
+      // Iniciar trazo guiado
+      setIsDrawing(true);
+      setCurrentStrokePoints([startPt]);
+      setNextControlPointIndex(1);
+      setDrawingPointer({ x, y });
+      speak('¡Eso es! Sigue la estrella.');
+    } else {
+      // Destello o aviso de que empiece en el punto verde
+      speak('Empieza en la bandera.');
+      triggerPulseParticles(startX, startY);
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const { x, y } = getCoordinates(e);
+
+    if (!isGuided) {
+      draw(x, y);
+      return;
+    }
+
+    // MODO GUIADO
+    if (!isDrawing) return;
+
+    const strokes = TRACE_PATHS[selectedChar] || [];
+    const activeStroke = strokes[currentStrokeIndex];
+    if (!activeStroke) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const width = canvas.width / (window.devicePixelRatio || 1);
+    const height = canvas.height / (window.devicePixelRatio || 1);
+
+    // Punto de control anterior (último alcanzado) y siguiente a alcanzar
+    const prevPt = activeStroke[nextControlPointIndex - 1];
+    const nextPt = activeStroke[nextControlPointIndex];
+    if (!nextPt || !prevPt) return;
+
+    const nextX = (nextPt.x * width) / 100;
+    const nextY = (nextPt.y * height) / 100;
+
+    // Calcular distancia al siguiente punto de control
+    const distToNext = Math.hypot(x - nextX, y - nextY);
+
+    // Calcular distancia de la posición actual del dedo al segmento para evitar desviarse
+    const prevX = (prevPt.x * width) / 100;
+    const prevY = (prevPt.y * height) / 100;
+    
+    // Distancia al segmento en píxeles
+    const distToSeg = distToSegment(
+      { x, y },
+      { x: prevX, y: prevY },
+      { x: nextX, y: nextY }
+    );
+
+    if (distToSeg > 75) {
+      // Se desvió demasiado del camino
+      setIsDrawing(false);
+      setCurrentStrokePoints([]);
+      setNextControlPointIndex(1);
+      setDrawingPointer(null);
+      speak('¡Uy! Te saliste del camino.');
+      return;
+    }
+
+    // Actualizar la posición visual del puntero
+    setDrawingPointer({ x, y });
+
+    if (distToNext < 50) {
+      // Llegó al siguiente punto de control!
+      const updatedPoints = [...currentStrokePoints, nextPt];
+      setCurrentStrokePoints(updatedPoints);
+      
+      triggerPointSparkParticles(nextX, nextY);
+
+      if (nextControlPointIndex + 1 < activeStroke.length) {
+        setNextControlPointIndex(nextControlPointIndex + 1);
+      } else {
+        // Trazo completo!
+        const nextCompleted = [...completedStrokes, activeStroke];
+        setCompletedStrokes(nextCompleted);
+        setIsDrawing(false);
+        setCurrentStrokePoints([]);
+        setDrawingPointer(null);
+
+        if (currentStrokeIndex + 1 < strokes.length) {
+          // Hay más trazos en este carácter
+          setCurrentStrokeIndex(currentStrokeIndex + 1);
+          setNextControlPointIndex(1);
+          speak('¡Bien hecho! Sigue el siguiente trazo.');
+        } else {
+          // Carácter completado por completo!
+          handleCharacterCompleted();
+        }
+      }
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (!isGuided) {
+      stopDrawing();
+      return;
+    }
+
+    // MODO GUIADO
+    if (isDrawing) {
+      setIsDrawing(false);
+      setCurrentStrokePoints([]);
+      setNextControlPointIndex(1);
+      setDrawingPointer(null);
+      speak('Inténtalo de nuevo.');
+    }
   };
 
   // Comprobar dibujo con IA o Fallback local
@@ -427,7 +1053,11 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onPointerDown={resetCanvas}
+          onPointerDown={() => {
+            resetGuidedState();
+            resetCanvas();
+            speak('¡Pizarra limpia! A dibujar de nuevo.');
+          }}
           className="bg-red-50 text-red-600 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-black border-2 border-white shadow-sm active:bg-red-100 transition-colors text-xs"
         >
           <Trash2 size={14} />
@@ -475,30 +1105,30 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
             <canvas
               ref={canvasRef}
               className="absolute inset-0 w-full h-full cursor-crosshair bg-white"
-              onPointerDown={(e) => { const { x, y } = getCoordinates(e); startDrawing(x, y); }}
-              onPointerMove={(e) => { const { x, y } = getCoordinates(e); draw(x, y); }}
-              onPointerUp={stopDrawing}
-              onPointerLeave={stopDrawing}
-              onPointerCancel={stopDrawing}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerUp}
+              onPointerCancel={handlePointerUp}
             />
 
             {/* Efecto de partículas de celebración flotando sobre el lienzo */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <AnimatePresence>
                 {particles.map((p) => (
                   <motion.div
                     key={p.id}
-                    initial={{ opacity: 0, scale: 0, x: 0, y: 0, rotate: 0 }}
+                    initial={{ opacity: 0, scale: 0, x: p.startX, y: p.startY, rotate: 0 }}
                     animate={{
                       opacity: [0, 1, 1, 0],
                       scale: p.scale,
-                      x: p.x * 6,
-                      y: p.y * 6 - 80,
+                      x: p.startX + p.x,
+                      y: p.startY + p.y,
                       rotate: p.rotate,
                     }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 2, ease: 'easeOut' }}
-                    className="absolute text-4xl sm:text-6xl select-none"
+                    transition={{ duration: p.duration || 1.8, ease: 'easeOut' }}
+                    className="absolute text-3xl sm:text-5xl select-none -ml-5 -mt-5"
                   >
                     {p.emoji}
                   </motion.div>
@@ -518,6 +1148,40 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
                 item={selectedChar}
                 size="md"
               />
+            </div>
+
+            {/* Selector de Modo: Guiado vs Libre */}
+            <div className="w-full bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner flex shrink-0">
+              <button
+                type="button"
+                onPointerDown={() => {
+                  setIsGuided(true);
+                  speak('Modo guiado. ¡Sigue las estrellitas!');
+                  setOwlMessage('¡Sigue los puntitos y las estrellas con tu dedito para trazar!');
+                }}
+                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all duration-150 flex items-center justify-center gap-1 ${
+                  isGuided
+                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                ✨ Guiado
+              </button>
+              <button
+                type="button"
+                onPointerDown={() => {
+                  setIsGuided(false);
+                  speak('Modo libre. ¡Pinta lo que quieras!');
+                  setOwlMessage('¡Dibuja libremente sobre la pizarra!');
+                }}
+                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all duration-150 flex items-center justify-center gap-1 ${
+                  !isGuided
+                    ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                🎨 Libre
+              </button>
             </div>
 
             {/* Caja de herramientas: Colores y Borrador */}
@@ -572,35 +1236,52 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
             {/* BOTÓN MÁGICO DE COMPROBACIÓN */}
             <div className="w-auto lg:w-full lg:mt-auto">
-              <motion.button
-                disabled={isChecking}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95, y: 4 }}
-                onPointerDown={checkDrawing}
-                className={`
-                  w-full py-3 px-4 sm:py-4 rounded-2xl sm:rounded-3xl font-black text-white text-sm sm:text-lg
-                  flex items-center justify-center gap-2 border-4 border-white
-                  ${
-                    isChecking
-                      ? 'bg-gray-300 shadow-[0_6px_0_#9CA3AF] cursor-not-allowed'
-                      : aiEnabled
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_6px_0_#4338CA]'
-                      : 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_6px_0_#047857]'
-                  }
-                `}
-              >
-                {isChecking ? (
-                  <div className="flex items-center gap-1.5 animate-pulse">
-                    <span>🤔</span>
-                    <span>Analizando...</span>
-                  </div>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    <span>COMPROBAR</span>
-                  </>
-                )}
-              </motion.button>
+              {isGuided && showNextButton ? (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95, y: 4 }}
+                  onPointerDown={handleNextCharacter}
+                  className="w-full py-3 px-4 sm:py-4 rounded-2xl sm:rounded-3xl font-black text-white text-sm sm:text-lg flex items-center justify-center gap-2 border-4 border-white bg-gradient-to-r from-orange-500 to-yellow-500 shadow-[0_6px_0_#C2410C] animate-bounce"
+                >
+                  <span>SIGUIENTE ➔</span>
+                </motion.button>
+              ) : (
+                <motion.button
+                  disabled={isChecking || (isGuided && !showNextButton)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95, y: 4 }}
+                  onPointerDown={checkDrawing}
+                  className={`
+                    w-full py-3 px-4 sm:py-4 rounded-2xl sm:rounded-3xl font-black text-white text-sm sm:text-lg
+                    flex items-center justify-center gap-2 border-4 border-white
+                    ${
+                      isChecking
+                        ? 'bg-gray-300 shadow-[0_6px_0_#9CA3AF] cursor-not-allowed'
+                        : isGuided
+                        ? 'bg-gray-200 text-slate-400 shadow-[0_6px_0_#CBD5E1] cursor-not-allowed'
+                        : aiEnabled
+                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_6px_0_#4338CA]'
+                        : 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_6px_0_#047857]'
+                    }
+                  `}
+                >
+                  {isChecking ? (
+                    <div className="flex items-center gap-1.5 animate-pulse">
+                      <span>🤔</span>
+                      <span>Analizando...</span>
+                    </div>
+                  ) : isGuided ? (
+                    <>
+                      <span>✨ Guiado</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      <span>COMPROBAR</span>
+                    </>
+                  )}
+                </motion.button>
+              )}
             </div>
 
           </div>
