@@ -82,98 +82,154 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   // Números
   '0': [
     [
-      { x: 50, y: 15 },
-      { x: 75, y: 22 },
-      { x: 85, y: 50 },
-      { x: 75, y: 78 },
-      { x: 50, y: 85 },
-      { x: 25, y: 78 },
-      { x: 15, y: 50 },
-      { x: 25, y: 22 },
-      { x: 50, y: 15 }
+      { x: 50, y: 12 },
+      { x: 68, y: 16 },
+      { x: 80, y: 30 },
+      { x: 84, y: 50 },
+      { x: 80, y: 70 },
+      { x: 68, y: 84 },
+      { x: 50, y: 88 },
+      { x: 32, y: 84 },
+      { x: 20, y: 70 },
+      { x: 16, y: 50 },
+      { x: 20, y: 30 },
+      { x: 32, y: 16 },
+      { x: 50, y: 12 }
     ]
   ],
   '1': [
-    [{ x: 35, y: 35 }, { x: 50, y: 15 }], // Ganchito
-    [{ x: 50, y: 15 }, { x: 50, y: 85 }], // Línea vertical
-    [{ x: 30, y: 85 }, { x: 70, y: 85 }]  // Base
+    [{ x: 36, y: 30 }, { x: 50, y: 14 }],      // Ganchito diagonal
+    [{ x: 50, y: 14 }, { x: 50, y: 86 }],       // Línea vertical
+    [{ x: 30, y: 86 }, { x: 70, y: 86 }]        // Base horizontal
   ],
   '2': [
     [
-      { x: 28, y: 30 },
-      { x: 38, y: 16 },
-      { x: 62, y: 16 },
-      { x: 72, y: 30 },
-      { x: 72, y: 45 },
-      { x: 30, y: 85 }
-    ], // Curva superior y diagonal
-    [{ x: 30, y: 85 }, { x: 72, y: 85 }]  // Base horizontal
+      { x: 28, y: 32 },
+      { x: 34, y: 18 },
+      { x: 50, y: 13 },
+      { x: 68, y: 18 },
+      { x: 74, y: 32 },
+      { x: 72, y: 46 },
+      { x: 58, y: 58 },
+      { x: 28, y: 82 }
+    ],
+    [{ x: 28, y: 82 }, { x: 74, y: 82 }]       // Base horizontal
   ],
   '3': [
-    [{ x: 30, y: 20 }, { x: 70, y: 20 }, { x: 50, y: 48 }], // Bucle superior
-    [{ x: 50, y: 48 }, { x: 72, y: 62 }, { x: 68, y: 82 }, { x: 45, y: 85 }, { x: 30, y: 78 }] // Bucle inferior
+    // Arco superior: de izquierda → cima → extremo derecho → centro
+    [
+      { x: 28, y: 28 },
+      { x: 40, y: 14 },
+      { x: 58, y: 13 },
+      { x: 72, y: 24 },
+      { x: 72, y: 40 },
+      { x: 60, y: 48 },
+      { x: 50, y: 50 }
+    ],
+    // Arco inferior: del centro → extremo derecho → base → izquierda
+    [
+      { x: 50, y: 50 },
+      { x: 64, y: 52 },
+      { x: 74, y: 64 },
+      { x: 72, y: 76 },
+      { x: 58, y: 86 },
+      { x: 40, y: 86 },
+      { x: 28, y: 78 }
+    ]
   ],
   '4': [
-    [{ x: 60, y: 15 }, { x: 25, y: 60 }, { x: 75, y: 60 }], // L vertical-diagonal-horizontal
-    [{ x: 60, y: 40 }, { x: 60, y: 85 }]  // Cruz vertical
+    // Diagonal de arriba-derecha a abajo-izquierda + barra horizontal
+    [{ x: 66, y: 14 }, { x: 22, y: 64 }, { x: 78, y: 64 }],
+    // Línea vertical desde arriba pasando por la barra
+    [{ x: 66, y: 14 }, { x: 66, y: 86 }]
   ],
   '5': [
-    [{ x: 35, y: 15 }, { x: 35, y: 45 }, { x: 65, y: 52 }, { x: 65, y: 78 }, { x: 50, y: 85 }, { x: 35, y: 78 }], // Espina y bucle
-    [{ x: 35, y: 15 }, { x: 65, y: 15 }]  // Techo
+    // Barra superior (derecha→izquierda) + lado izquierdo + curva inferior
+    [
+      { x: 70, y: 14 },
+      { x: 30, y: 14 },
+      { x: 30, y: 50 },
+      { x: 50, y: 47 },
+      { x: 68, y: 56 },
+      { x: 72, y: 70 },
+      { x: 64, y: 82 },
+      { x: 48, y: 87 },
+      { x: 30, y: 80 },
+      { x: 24, y: 70 }
+    ]
   ],
   '6': [
     [
-      { x: 65, y: 15 },
-      { x: 42, y: 32 },
-      { x: 30, y: 55 },
-      { x: 35, y: 80 },
-      { x: 65, y: 80 },
-      { x: 70, y: 60 },
-      { x: 55, y: 48 },
-      { x: 35, y: 55 }
-    ] // Espiral y círculo inferior
+      { x: 66, y: 14 },
+      { x: 46, y: 14 },
+      { x: 28, y: 32 },
+      { x: 22, y: 55 },
+      { x: 28, y: 76 },
+      { x: 46, y: 87 },
+      { x: 64, y: 84 },
+      { x: 76, y: 70 },
+      { x: 74, y: 56 },
+      { x: 60, y: 46 },
+      { x: 42, y: 48 },
+      { x: 28, y: 58 }
+    ]
   ],
   '7': [
-    [{ x: 30, y: 15 }, { x: 70, y: 15 }, { x: 45, y: 85 }], // Techo y diagonal
-    [{ x: 37, y: 50 }, { x: 57, y: 50 }]  // Barra horizontal
+    // Barra horizontal superior
+    [{ x: 25, y: 14 }, { x: 75, y: 14 }],
+    // Diagonal hacia abajo-izquierda
+    [{ x: 75, y: 14 }, { x: 42, y: 86 }]
   ],
   '8': [
     [
-      { x: 50, y: 50 },
-      { x: 30, y: 32 },
-      { x: 50, y: 15 },
-      { x: 70, y: 32 },
-      { x: 50, y: 50 },
-      { x: 30, y: 68 },
-      { x: 50, y: 85 },
-      { x: 70, y: 68 },
-      { x: 50, y: 50 }
-    ] // Ocho continuo
+      { x: 50, y: 14 },
+      { x: 70, y: 22 },
+      { x: 74, y: 38 },
+      { x: 62, y: 50 },
+      { x: 74, y: 62 },
+      { x: 72, y: 78 },
+      { x: 50, y: 86 },
+      { x: 28, y: 78 },
+      { x: 26, y: 62 },
+      { x: 38, y: 50 },
+      { x: 26, y: 38 },
+      { x: 30, y: 22 },
+      { x: 50, y: 14 }
+    ]
   ],
   '9': [
     [
-      { x: 68, y: 50 },
-      { x: 42, y: 50 },
-      { x: 32, y: 32 },
-      { x: 50, y: 15 },
-      { x: 68, y: 32 },
-      { x: 68, y: 85 }
-    ] // Cabeza redonda y cola vertical
+      { x: 50, y: 13 },
+      { x: 68, y: 20 },
+      { x: 76, y: 36 },
+      { x: 72, y: 54 },
+      { x: 56, y: 62 },
+      { x: 38, y: 58 },
+      { x: 26, y: 44 },
+      { x: 28, y: 28 },
+      { x: 42, y: 15 },
+      { x: 62, y: 18 },
+      { x: 74, y: 36 },
+      { x: 74, y: 86 }
+    ]
   ],
   '10': [
-    // El 1
-    [{ x: 20, y: 35 }, { x: 30, y: 15 }, { x: 30, y: 85 }],
-    // El 0
+    // El 1 (izquierda)
+    [{ x: 18, y: 34 }, { x: 28, y: 14 }, { x: 28, y: 86 }],
+    [{ x: 14, y: 86 }, { x: 42, y: 86 }],
+    // El 0 (derecha)
     [
-      { x: 65, y: 15 },
-      { x: 78, y: 22 },
-      { x: 85, y: 50 },
-      { x: 78, y: 78 },
-      { x: 65, y: 85 },
-      { x: 52, y: 78 },
-      { x: 45, y: 50 },
-      { x: 52, y: 22 },
-      { x: 65, y: 15 }
+      { x: 64, y: 14 },
+      { x: 76, y: 24 },
+      { x: 82, y: 42 },
+      { x: 82, y: 60 },
+      { x: 76, y: 76 },
+      { x: 64, y: 86 },
+      { x: 52, y: 76 },
+      { x: 46, y: 60 },
+      { x: 46, y: 42 },
+      { x: 52, y: 24 },
+      { x: 64, y: 14 }
     ]
   ],
   // Figuras
@@ -799,34 +855,40 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     const height = canvas.height / (window.devicePixelRatio || 1);
 
     // Buscar si el niño tocó cerca de CUALQUIER punto de control del trazo activo
+    // Tolerancia más grande (80px) para que sea más fácil para niños pequeños
     let matchedIndex = -1;
+    let bestDist = Infinity;
     for (let i = 0; i < activeStroke.length; i++) {
       const ptX = (activeStroke[i].x * width) / 100;
       const ptY = (activeStroke[i].y * height) / 100;
       const dist = Math.hypot(x - ptX, y - ptY);
-      if (dist < 60) {
+      if (dist < 80 && dist < bestDist) {
+        bestDist = dist;
         matchedIndex = i;
-        break;
       }
     }
 
     if (matchedIndex !== -1) {
       // Iniciar trazo guiado desde el punto tocado
+      // Si el punto ya fue visitado, permitir continuar desde él sin borrar progreso
       setIsDrawing(true);
-      setVisitedIndices([matchedIndex]);
+      if (!visitedIndices.includes(matchedIndex)) {
+        setVisitedIndices((prev) => [...prev, matchedIndex]);
+      }
 
       const normX = (x / width) * 100;
       const normY = (y / height) * 100;
       setCurrentDrawnPoints([{ x: normX, y: normY }]);
       setDrawingPointer({ x, y });
-      speak('¡Eso es! Sigue las estrellas.');
     } else {
-      // Avisar y hacer brillar los puntos
+      // Avisar y hacer brillar los puntos aún no visitados
       speak('Toca una estrella para empezar a dibujar.');
-      activeStroke.forEach((pt) => {
-        const px = (pt.x * width) / 100;
-        const py = (pt.y * height) / 100;
-        triggerPulseParticles(px, py);
+      activeStroke.forEach((pt, idx) => {
+        if (!visitedIndices.includes(idx)) {
+          const px = (pt.x * width) / 100;
+          const py = (pt.y * height) / 100;
+          triggerPulseParticles(px, py);
+        }
       });
     }
   };
@@ -924,13 +986,18 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       return;
     }
 
-    // MODO GUIADO
+    // MODO GUIADO: al levantar el dedo, se CONSERVA el progreso (visitedIndices)
+    // para que el niño pueda continuar desde donde lo dejó.
+    // Solo se limpia el trazo dibujado "en este gesto" para que pueda retomar.
     if (isDrawing) {
       setIsDrawing(false);
+      // Guardar los puntos dibujados en este gesto como un sub-trazo completado
+      if (currentDrawnPoints.length > 1) {
+        setCompletedDrawnPaths((prev) => [...prev, currentDrawnPoints]);
+      }
       setCurrentDrawnPoints([]);
-      setVisitedIndices([]);
       setDrawingPointer(null);
-      speak('Inténtalo de nuevo.');
+      // NO borrar visitedIndices: el progreso se conserva entre gestos
     }
   };
 
