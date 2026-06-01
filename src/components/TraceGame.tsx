@@ -57,14 +57,14 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   ],
   'O': [
     [
-      { x: 50, y: 15 }, 
-      { x: 75, y: 22 }, 
-      { x: 85, y: 50 }, 
-      { x: 75, y: 78 }, 
-      { x: 50, y: 85 }, 
-      { x: 25, y: 78 }, 
-      { x: 15, y: 50 }, 
-      { x: 25, y: 22 }, 
+      { x: 50, y: 15 },
+      { x: 75, y: 22 },
+      { x: 85, y: 50 },
+      { x: 75, y: 78 },
+      { x: 50, y: 85 },
+      { x: 25, y: 78 },
+      { x: 15, y: 50 },
+      { x: 25, y: 22 },
       { x: 50, y: 15 }
     ] // Trazo 1: círculo completo
   ],
@@ -82,14 +82,14 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   // Números
   '0': [
     [
-      { x: 50, y: 15 }, 
-      { x: 75, y: 22 }, 
-      { x: 85, y: 50 }, 
-      { x: 75, y: 78 }, 
-      { x: 50, y: 85 }, 
-      { x: 25, y: 78 }, 
-      { x: 15, y: 50 }, 
-      { x: 25, y: 22 }, 
+      { x: 50, y: 15 },
+      { x: 75, y: 22 },
+      { x: 85, y: 50 },
+      { x: 75, y: 78 },
+      { x: 50, y: 85 },
+      { x: 25, y: 78 },
+      { x: 15, y: 50 },
+      { x: 25, y: 22 },
       { x: 50, y: 15 }
     ]
   ],
@@ -100,11 +100,11 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   ],
   '2': [
     [
-      { x: 28, y: 30 }, 
-      { x: 38, y: 16 }, 
-      { x: 62, y: 16 }, 
-      { x: 72, y: 30 }, 
-      { x: 72, y: 45 }, 
+      { x: 28, y: 30 },
+      { x: 38, y: 16 },
+      { x: 62, y: 16 },
+      { x: 72, y: 30 },
+      { x: 72, y: 45 },
       { x: 30, y: 85 }
     ], // Curva superior y diagonal
     [{ x: 30, y: 85 }, { x: 72, y: 85 }]  // Base horizontal
@@ -123,13 +123,13 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   ],
   '6': [
     [
-      { x: 65, y: 15 }, 
-      { x: 42, y: 32 }, 
-      { x: 30, y: 55 }, 
-      { x: 35, y: 80 }, 
-      { x: 65, y: 80 }, 
-      { x: 70, y: 60 }, 
-      { x: 55, y: 48 }, 
+      { x: 65, y: 15 },
+      { x: 42, y: 32 },
+      { x: 30, y: 55 },
+      { x: 35, y: 80 },
+      { x: 65, y: 80 },
+      { x: 70, y: 60 },
+      { x: 55, y: 48 },
       { x: 35, y: 55 }
     ] // Espiral y círculo inferior
   ],
@@ -139,24 +139,24 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   ],
   '8': [
     [
-      { x: 50, y: 50 }, 
-      { x: 30, y: 32 }, 
-      { x: 50, y: 15 }, 
-      { x: 70, y: 32 }, 
-      { x: 50, y: 50 }, 
-      { x: 30, y: 68 }, 
-      { x: 50, y: 85 }, 
-      { x: 70, y: 68 }, 
+      { x: 50, y: 50 },
+      { x: 30, y: 32 },
+      { x: 50, y: 15 },
+      { x: 70, y: 32 },
+      { x: 50, y: 50 },
+      { x: 30, y: 68 },
+      { x: 50, y: 85 },
+      { x: 70, y: 68 },
       { x: 50, y: 50 }
     ] // Ocho continuo
   ],
   '9': [
     [
-      { x: 68, y: 50 }, 
-      { x: 42, y: 50 }, 
-      { x: 32, y: 32 }, 
-      { x: 50, y: 15 }, 
-      { x: 68, y: 32 }, 
+      { x: 68, y: 50 },
+      { x: 42, y: 50 },
+      { x: 32, y: 32 },
+      { x: 50, y: 15 },
+      { x: 68, y: 32 },
       { x: 68, y: 85 }
     ] // Cabeza redonda y cola vertical
   ],
@@ -165,28 +165,28 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
     [{ x: 20, y: 35 }, { x: 30, y: 15 }, { x: 30, y: 85 }],
     // El 0
     [
-      { x: 65, y: 15 }, 
-      { x: 78, y: 22 }, 
-      { x: 85, y: 50 }, 
-      { x: 78, y: 78 }, 
-      { x: 65, y: 85 }, 
-      { x: 52, y: 78 }, 
-      { x: 45, y: 50 }, 
-      { x: 52, y: 22 }, 
+      { x: 65, y: 15 },
+      { x: 78, y: 22 },
+      { x: 85, y: 50 },
+      { x: 78, y: 78 },
+      { x: 65, y: 85 },
+      { x: 52, y: 78 },
+      { x: 45, y: 50 },
+      { x: 52, y: 22 },
       { x: 65, y: 15 }
     ]
   ],
   // Figuras
   '◯': [
     [
-      { x: 50, y: 15 }, 
-      { x: 75, y: 25 }, 
-      { x: 85, y: 50 }, 
-      { x: 75, y: 75 }, 
-      { x: 50, y: 85 }, 
-      { x: 25, y: 75 }, 
-      { x: 15, y: 50 }, 
-      { x: 25, y: 25 }, 
+      { x: 50, y: 15 },
+      { x: 75, y: 25 },
+      { x: 85, y: 50 },
+      { x: 75, y: 75 },
+      { x: 50, y: 85 },
+      { x: 25, y: 75 },
+      { x: 15, y: 50 },
+      { x: 25, y: 25 },
       { x: 50, y: 15 }
     ]
   ],
@@ -198,29 +198,29 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   ],
   '☆': [
     [
-      { x: 50, y: 15 }, 
-      { x: 61, y: 38 }, 
-      { x: 86, y: 38 }, 
-      { x: 66, y: 53 }, 
-      { x: 73, y: 79 }, 
-      { x: 50, y: 63 }, 
-      { x: 27, y: 79 }, 
-      { x: 34, y: 53 }, 
-      { x: 14, y: 38 }, 
-      { x: 39, y: 38 }, 
+      { x: 50, y: 15 },
+      { x: 61, y: 38 },
+      { x: 86, y: 38 },
+      { x: 66, y: 53 },
+      { x: 73, y: 79 },
+      { x: 50, y: 63 },
+      { x: 27, y: 79 },
+      { x: 34, y: 53 },
+      { x: 14, y: 38 },
+      { x: 39, y: 38 },
       { x: 50, y: 15 }
     ]
   ],
   '♡': [
     [
-      { x: 50, y: 30 }, 
-      { x: 35, y: 15 }, 
-      { x: 15, y: 30 }, 
-      { x: 20, y: 55 }, 
-      { x: 50, y: 85 }, 
-      { x: 80, y: 55 }, 
-      { x: 85, y: 30 }, 
-      { x: 65, y: 15 }, 
+      { x: 50, y: 30 },
+      { x: 35, y: 15 },
+      { x: 15, y: 30 },
+      { x: 20, y: 55 },
+      { x: 50, y: 85 },
+      { x: 80, y: 55 },
+      { x: 85, y: 30 },
+      { x: 65, y: 15 },
       { x: 50, y: 30 }
     ]
   ],
@@ -229,14 +229,14 @@ const TRACE_PATHS: Record<string, Stroke[]> = {
   ],
   '☾': [
     [
-      { x: 35, y: 15 }, 
-      { x: 60, y: 25 }, 
-      { x: 70, y: 50 }, 
-      { x: 60, y: 75 }, 
-      { x: 35, y: 85 }, 
-      { x: 50, y: 72 }, 
-      { x: 55, y: 50 }, 
-      { x: 50, y: 28 }, 
+      { x: 35, y: 15 },
+      { x: 60, y: 25 },
+      { x: 70, y: 50 },
+      { x: 60, y: 75 },
+      { x: 35, y: 85 },
+      { x: 50, y: 72 },
+      { x: 55, y: 50 },
+      { x: 50, y: 28 },
       { x: 35, y: 15 }
     ]
   ]
@@ -358,7 +358,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
   const drawTemplate = (ctx: CanvasRenderingContext2D, width: number, height: number, char: string) => {
     ctx.save();
-    
+
     // Rellenar de blanco el fondo
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
@@ -570,7 +570,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     ctx.beginPath();
     const brushWidth = isEraser ? 36 : 20;
     ctx.arc(x, y, brushWidth / 2, 0, Math.PI * 2);
-    
+
     if (isEraser) {
       ctx.fillStyle = '#ffffff';
     } else if (brushColor.value === 'rainbow') {
@@ -579,7 +579,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     } else {
       ctx.fillStyle = brushColor.value;
     }
-    
+
     ctx.fill();
     ctx.restore();
   };
@@ -629,7 +629,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    
+
     return {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -639,11 +639,11 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
   const handleSelectChar = (char: string) => {
     setSelectedChar(char);
     setIsEraser(false);
-    
+
     // Hablar la instrucción
     let itemPrefix = '';
     let spokenText = '';
-    
+
     if (activeTab === 'vowels') {
       itemPrefix = 'la letra';
       spokenText = `¡Vamos a dibujar la letra ${char}!`;
@@ -657,7 +657,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       spokenText = `¡Vamos a dibujar ${itemPrefix}!`;
       setOwlMessage(`Sigue los puntitos con tu dedito para dibujar ${itemPrefix}.`);
     }
-    
+
     speak(spokenText);
   };
 
@@ -743,7 +743,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
   const handleCharacterCompleted = () => {
     triggerCelebrationParticles();
-    
+
     // Felicitar
     const targetName = activeTab === 'shapes' ? (SHAPE_NAMES[selectedChar] || selectedChar) : selectedChar;
     const isVowel = activeTab === 'vowels';
@@ -814,7 +814,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
       // Iniciar trazo guiado desde el punto tocado
       setIsDrawing(true);
       setVisitedIndices([matchedIndex]);
-      
+
       const normX = (x / width) * 100;
       const normY = (y / height) * 100;
       setCurrentDrawnPoints([{ x: normX, y: normY }]);
@@ -889,7 +889,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
         const ptX = (activeStroke[i].x * width) / 100;
         const ptY = (activeStroke[i].y * height) / 100;
         const dist = Math.hypot(x - ptX, y - ptY);
-        
+
         if (dist < 50) {
           const nextVisited = [...visitedIndices, i];
           setVisitedIndices(nextVisited);
@@ -941,7 +941,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
     setIsChecking(true);
     setOwlMessage('Mirando tu dibujo...');
-    
+
     const wordPrefix = activeTab === 'vowels' ? 'letra' : activeTab === 'numbers' ? 'número' : 'figura';
     const targetName = activeTab === 'shapes' ? (SHAPE_NAMES[selectedChar] || selectedChar) : selectedChar;
 
@@ -983,14 +983,14 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
   const localFeedbackFallback = () => {
     triggerCelebrationParticles();
-    
+
     const targetName = activeTab === 'shapes' ? (SHAPE_NAMES[selectedChar] || selectedChar) : selectedChar;
     const congrats = [
       `¡Guau! ¡Te quedó precioso! Has dibujado ${activeTab === 'vowels' ? 'la letra' : activeTab === 'numbers' ? 'el número' : 'la figura'} ${targetName} muy bien. ¡Eres un gran artista! 🌟`,
       `¡Increíble! ¡Qué bonito trazo! Sigue así, lo haces súper bien. 🎉`,
       `¡Qué hermoso te ha quedado! ¡Eres muy inteligente! ¿Hacemos otro? 💖`
     ];
-    
+
     const randomCongrat = congrats[Math.floor(Math.random() * congrats.length)];
     setOwlMessage(randomCongrat);
     speak(randomCongrat);
@@ -998,7 +998,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
   return (
     <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-100 font-sans select-none touch-none">
-      
+
       {/* HEADER COMPACTO */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-1.5 bg-white shadow-sm rounded-b-2xl border-b-2 border-white">
         <div className="flex items-center gap-2">
@@ -1008,7 +1008,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
           >
             <ArrowLeft strokeWidth={3} className="w-4 h-4 md:w-5 md:h-5" />
           </button>
-          
+
           <div className="flex items-center gap-1.5 bg-orange-100 px-3 py-1 rounded-full border-2 border-white shadow-sm">
             <span className="text-lg">✍️</span>
             <span className="text-xs md:text-sm font-black text-orange-600 uppercase tracking-widest hidden sm:block">
@@ -1021,31 +1021,28 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
         <div className="flex gap-1 bg-slate-100 p-0.5 rounded-full border border-slate-200 shadow-inner">
           <button
             onClick={() => handleTabChange('vowels')}
-            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
-              activeTab === 'vowels'
-                ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${activeTab === 'vowels'
+              ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             🔤 Vocales
           </button>
           <button
             onClick={() => handleTabChange('numbers')}
-            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
-              activeTab === 'numbers'
-                ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${activeTab === 'numbers'
+              ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             🔢 Números
           </button>
           <button
             onClick={() => handleTabChange('shapes')}
-            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${
-              activeTab === 'shapes'
-                ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`px-2.5 py-1 text-xs md:text-sm font-black rounded-full transition-all duration-150 ${activeTab === 'shapes'
+              ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
           >
             🔷 Figuras
           </button>
@@ -1069,7 +1066,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
       {/* ÁREA PRINCIPAL */}
       <div className="flex-grow flex flex-col items-center w-full px-2 sm:px-4 md:px-8 pt-2 pb-3 overflow-hidden relative z-10 min-h-0">
-        
+
         {/* CAROUSEL DE BOTONES DE SELECCIÓN (VOCALES O NÚMEROS) */}
         <div className="shrink-0 w-full max-w-6xl mx-auto mb-2 overflow-x-auto custom-scrollbar py-2">
           <div className="flex gap-2 sm:gap-4 px-2 justify-start sm:justify-center min-w-max">
@@ -1084,10 +1081,9 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
                   className={`
                     relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-3xl
                     flex items-center justify-center border-4 border-white/90 transition-all duration-150
-                    ${
-                      isSelected
-                        ? '-translate-y-2 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-[0_8px_0_#C2410C]'
-                        : 'bg-white text-orange-500 shadow-[0_6px_0_#E2E8F0] opacity-90'
+                    ${isSelected
+                      ? '-translate-y-2 bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-[0_8px_0_#C2410C]'
+                      : 'bg-white text-orange-500 shadow-[0_6px_0_#E2E8F0] opacity-90'
                     }
                   `}
                 >
@@ -1101,7 +1097,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
         {/* CONTENEDOR CENTRAL: LIENZO Y TUTOR OWL */}
         <div className="flex-grow w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 items-stretch overflow-hidden min-h-0 relative">
-          
+
           {/* LIENZO DE DIBUJO CON MARCO ESTILO JUGUETE */}
           <div className="flex-1 bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl border-[8px] sm:border-[12px] border-slate-200 overflow-hidden relative min-h-0 touch-none">
             <canvas
@@ -1141,7 +1137,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
 
           {/* COLUMNA LATERAL: TUTOR Y ACCIONES */}
           <div className="shrink-0 flex flex-row lg:flex-col justify-between items-center lg:justify-start gap-4 p-2 sm:p-4 bg-white/70 backdrop-blur-md rounded-3xl border-4 border-white shadow-lg lg:w-72">
-            
+
             {/* Mascot Owl y Burbuja */}
             <div className="flex-1 lg:flex-none flex items-center justify-center lg:py-6">
               <TutorOwl
@@ -1161,11 +1157,10 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
                   speak('Modo guiado. ¡Sigue las estrellitas!');
                   setOwlMessage('¡Sigue los puntitos y las estrellas con tu dedito para trazar!');
                 }}
-                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all duration-150 flex items-center justify-center gap-1 ${
-                  isGuided
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all duration-150 flex items-center justify-center gap-1 ${isGuided
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-700'
+                  }`}
               >
                 ✨ Guiado
               </button>
@@ -1176,11 +1171,10 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
                   speak('Modo libre. ¡Pinta lo que quieras!');
                   setOwlMessage('¡Dibuja libremente sobre la pizarra!');
                 }}
-                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all duration-150 flex items-center justify-center gap-1 ${
-                  !isGuided
-                    ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all duration-150 flex items-center justify-center gap-1 ${!isGuided
+                  ? 'bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-700'
+                  }`}
               >
                 🎨 Libre
               </button>
@@ -1225,6 +1219,7 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
                     speak('Borrador');
                   }}
                   className={`
+        
                     relative w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-150 border-3 border-white
                     bg-slate-100 text-slate-600 flex items-center justify-center shadow-[0_4px_0_#94A3B8]
                     ${isEraser ? '-translate-y-1.5 ring-4 ring-slate-300 shadow-[0_6px_0_#94A3B8]' : 'opacity-90'}
@@ -1256,14 +1251,13 @@ export default function TraceGame({ onBack, isFirstTime, onVisit }: { onBack: ()
                   className={`
                     w-full py-3 px-4 sm:py-4 rounded-2xl sm:rounded-3xl font-black text-white text-sm sm:text-lg
                     flex items-center justify-center gap-2 border-4 border-white
-                    ${
-                      isChecking
-                        ? 'bg-gray-300 shadow-[0_6px_0_#9CA3AF] cursor-not-allowed'
-                        : isGuided
+                    ${isChecking
+                      ? 'bg-gray-300 shadow-[0_6px_0_#9CA3AF] cursor-not-allowed'
+                      : isGuided
                         ? 'bg-gray-200 text-slate-400 shadow-[0_6px_0_#CBD5E1] cursor-not-allowed'
                         : aiEnabled
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_6px_0_#4338CA]'
-                        : 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_6px_0_#047857]'
+                          ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-[0_6px_0_#4338CA]'
+                          : 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_6px_0_#047857]'
                     }
                   `}
                 >
