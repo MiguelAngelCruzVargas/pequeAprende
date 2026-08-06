@@ -11,7 +11,7 @@ const colors = [
   { name: 'Naranja', hex: '#F97316', text: 'text-white', shadow: 'shadow-[0_8px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]', emo: '🍊' },
   { name: 'Rosa', hex: '#EC4899', text: 'text-white', shadow: 'shadow-[0_8px_0_#BE185D]', activeShadow: 'active:shadow-[0_0px_0_#BE185D]', emo: '🐷' },
   { name: 'Morado', hex: '#A855F7', text: 'text-white', shadow: 'shadow-[0_8px_0_#7E22CE]', activeShadow: 'active:shadow-[0_0px_0_#7E22CE]', emo: '🍇' },
-  { name: 'Blanco', hex: '#FFFFFF', text: 'text-slate-800', shadow: 'shadow-[0_8px_0_#CBD5E1]', activeShadow: 'active:shadow-[0_0px_0_#CBD5E1]', emo: '☁️', extraClasses: 'border-4 border-slate-200' },
+  { name: 'Blanco', hex: '#FFFFFF', text: 'text-slate-800', shadow: 'shadow-[0_8px_0_#CBD5E1]', activeShadow: 'active:shadow-[0_0px_0_#CBD5E1]', emo: '☁️', extraClasses: '!border-slate-200' },
 ];
 
 type ColorItem = typeof colors[0];
@@ -102,7 +102,7 @@ export default function ColorsGame({ onBack, isFirstTime, onVisit }: { onBack: (
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50 font-sans select-none">
+    <div className="h-[100dvh] flex flex-col w-full overflow-hidden play-mat-bg font-sans select-none">
 
       {/* HEADER COMPACTO Y ESTANDARIZADO */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-1.5 bg-white/80  shadow-sm rounded-b-2xl border-b-2 border-white">
@@ -150,7 +150,7 @@ export default function ColorsGame({ onBack, isFirstTime, onVisit }: { onBack: (
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 w-full max-w-6xl mx-auto pb-6">
+          <div className="card-grid-auto gap-4 md:gap-6 lg:gap-8 w-full max-w-6xl mx-auto pb-6">
             {colors.map((color, index) => (
               <motion.button
                 key={color.name}
@@ -162,17 +162,14 @@ export default function ColorsGame({ onBack, isFirstTime, onVisit }: { onBack: (
                 onPointerDown={() => handleColorClick(color.name)}
                 style={{ backgroundColor: color.hex }}
                 className={`
-                  group relative rounded-[2.5rem] md:rounded-[3.5rem]
+                  group relative rounded-[2.5rem] md:rounded-[3rem]
                   flex flex-col items-center justify-center aspect-square transition-all duration-150
-                  border-4 sm:border-[6px] border-white/90
+                  border-[6px] border-[#FFF8E9]
                   ${color.shadow} ${color.activeShadow}
                   ${color.text} ${color.extraClasses || ''}
                   touch-manipulation overflow-hidden
                 `}
               >
-                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                <div className="absolute top-[5%] left-[10%] w-[60%] h-[20%] bg-white/40 rounded-full blur-[2px] rotate-[-15deg] pointer-events-none" />
-
                 <motion.div
                   animate={activeColor === color.name ? { scale: [1, 1.4, 1], rotate: [0, 10, -10, 0] } : {}}
                   transition={{ duration: 0.4 }}
@@ -256,15 +253,13 @@ export default function ColorsGame({ onBack, isFirstTime, onVisit }: { onBack: (
                       style={{ backgroundColor: option.hex }}
                       className={`
                         w-24 h-24 sm:w-36 sm:h-36 rounded-[2rem] sm:rounded-[2.5rem]
-                        border-[4px] sm:border-[6px] border-white/90 transition-all duration-200
+                        border-[6px] border-[#FFF8E9] transition-all duration-200
                         flex items-center justify-center relative overflow-hidden
                         ${option.shadow} ${!locked && option.activeShadow} ${option.extraClasses || ''}
-                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-purple-50' : ''}
+                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-[#F5EDDB]' : ''}
                         touch-manipulation
                       `}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                      <div className="absolute top-[10%] left-[15%] w-1/3 h-1/4 bg-white/40 rounded-full blur-[1px] rotate-[-30deg] pointer-events-none" />
                     </motion.button>
                   );
                 })}

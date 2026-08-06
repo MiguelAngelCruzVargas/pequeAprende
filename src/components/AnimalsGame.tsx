@@ -128,7 +128,7 @@ export default function AnimalsGame({ onBack, isFirstTime, onVisit }: { onBack: 
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-orange-50 via-amber-50 to-yellow-50 font-sans select-none">
+    <div className="h-[100dvh] flex flex-col w-full overflow-hidden play-mat-bg font-sans select-none">
 
       {/* HEADER COMPACTO Y ESTANDARIZADO */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-1.5 bg-white shadow-sm rounded-b-2xl border-b-2 border-white">
@@ -175,7 +175,7 @@ export default function AnimalsGame({ onBack, isFirstTime, onVisit }: { onBack: 
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 w-full max-w-[1200px] mx-auto pb-6">
+          <div className="card-grid-auto gap-4 md:gap-6 lg:gap-8 w-full max-w-[1200px] mx-auto pb-6">
             {animals.map((animal, index) => (
               <motion.button
                 key={animal.name}
@@ -186,16 +186,13 @@ export default function AnimalsGame({ onBack, isFirstTime, onVisit }: { onBack: 
                 whileTap={{ scale: 0.95, y: 10 }}
                 onPointerDown={() => handleAnimalClick(animal)}
                 className={`
-                  group relative rounded-[2.5rem] md:rounded-[3.5rem]
+                  group relative rounded-[2.5rem] md:rounded-[3rem]
                   flex flex-col items-center justify-center aspect-square transition-all duration-150
-                  border-4 sm:border-[6px] border-white/90
+                  border-[6px] border-[#FFF8E9]
                   ${animal.bg} ${animal.shadow} ${animal.activeShadow}
                   touch-manipulation overflow-hidden
                 `}
               >
-                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                <div className="absolute top-[5%] left-[10%] w-[50%] h-[20%] bg-white/40 rounded-full blur-[1px] rotate-[-15deg] pointer-events-none" />
-
                 <motion.div
                   animate={activeAnimal === animal.name ? { scale: [1, 1.4, 1], rotate: [0, 15, -15, 10, -10, 0] } : { scale: 1 }}
                   transition={{ duration: 0.6 }}
@@ -280,15 +277,13 @@ export default function AnimalsGame({ onBack, isFirstTime, onVisit }: { onBack: 
                       disabled={locked}
                       className={`
                         w-24 h-24 sm:w-36 sm:h-36 rounded-[2rem] sm:rounded-[2.5rem]
-                        border-[4px] sm:border-[6px] border-white/90 transition-all duration-200
+                        border-[6px] border-[#FFF8E9] transition-all duration-200
                         flex items-center justify-center relative overflow-hidden
                         ${option.bg} ${!locked && option.activeShadow} ${option.shadow}
-                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-orange-50' : ''}
+                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-[#F5EDDB]' : ''}
                         touch-manipulation
                       `}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                      <div className="absolute top-[10%] left-[15%] w-1/3 h-1/4 bg-white/40 rounded-full blur-[1px] rotate-[-30deg] pointer-events-none" />
                       <span className="text-5xl sm:text-6xl drop-shadow-md relative z-10">{option.icon}</span>
                     </motion.button>
                   );

@@ -130,7 +130,7 @@ export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: (
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-orange-50 via-amber-50 to-yellow-100 font-sans select-none">
+    <div className="h-[100dvh] flex flex-col w-full overflow-hidden play-mat-bg font-sans select-none">
 
       {/* HEADER COMPACTO Y ESTANDARIZADO */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-2 bg-white/90 backdrop-blur-md shadow-md rounded-b-3xl border-b-4 border-amber-200/50">
@@ -178,7 +178,7 @@ export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: (
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10 w-full max-w-[1400px] mx-auto pb-6 px-2">
+          <div className="card-grid-auto gap-6 md:gap-8 lg:gap-10 w-full max-w-[1400px] mx-auto pb-6 px-2">
             {shapes.map((shape, index) => (
               <motion.button
                 key={shape.name}
@@ -190,25 +190,22 @@ export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: (
                 onPointerDown={() => handleShapeClick(shape.name)}
                 className={`
                   group relative rounded-[2.5rem] md:rounded-[3rem]
-                  flex flex-col items-center justify-center aspect-[1/1.25] transition-all duration-150
-                  border-4 sm:border-[8px] border-white/40
+                  flex flex-col items-center justify-center aspect-square transition-all duration-150
+                  border-[8px] border-[#FFF8E9]
                   ${shape.bg} ${shape.shadow} ${shape.activeShadow}
                   touch-manipulation overflow-hidden
                 `}
               >
-                <div className="absolute top-0 left-0 right-0 h-2/3 bg-gradient-to-b from-white/25 to-transparent pointer-events-none" />
-                <div className="absolute top-[8%] left-[12%] w-[35%] h-[15%] bg-white/30 rounded-full blur-[1px] rotate-[-20deg] pointer-events-none" />
-
                 <motion.div
                   animate={activeShape === shape.name ? { scale: [1, 1.2, 0.9, 1.1, 1], rotate: [0, 10, -10, 5, 0] } : { scale: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="relative z-10 mb-8 md:mb-12"
+                  className="relative z-10 mb-6 md:mb-8"
                 >
-                  <shape.Icon className="w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 text-white drop-shadow-[0_10px_6px_rgba(0,0,0,0.2)]" />
+                  <shape.Icon className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 text-white drop-shadow-[0_10px_6px_rgba(0,0,0,0.2)]" />
                 </motion.div>
 
-                <div className="absolute bottom-5 md:bottom-7 w-[85%] left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-sm rounded-2xl py-2 border border-white/30 z-10">
-                  <span className="text-lg sm:text-xl md:text-2xl font-black uppercase tracking-tighter text-white drop-shadow-lg">
+                <div className="absolute bottom-4 md:bottom-6 w-[85%] left-1/2 -translate-x-1/2 bg-black/25 rounded-2xl py-1.5 z-10">
+                  <span className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tighter text-white drop-shadow-lg block text-center">
                     {shape.name}
                   </span>
                 </div>
@@ -283,15 +280,13 @@ export default function ShapesGame({ onBack, isFirstTime, onVisit }: { onBack: (
                       disabled={locked}
                       className={`
                         w-24 h-24 sm:w-36 sm:h-36 rounded-[2rem] sm:rounded-[2.5rem]
-                        border-[4px] sm:border-[6px] border-white/90 transition-all duration-200
+                        border-[6px] border-[#FFF8E9] transition-all duration-200
                         flex items-center justify-center relative overflow-hidden
                         ${option.bg} ${!locked && option.activeShadow} ${option.shadow}
-                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-amber-50' : ''}
+                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-[#F5EDDB]' : ''}
                         touch-manipulation
                       `}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                      <div className="absolute top-[10%] left-[15%] w-1/3 h-1/4 bg-white/40 rounded-full blur-[1px] rotate-[-30deg] pointer-events-none" />
                       <option.Icon className="w-14 h-14 sm:w-20 sm:h-20 text-white drop-shadow-md relative z-10" />
                     </motion.button>
                   );

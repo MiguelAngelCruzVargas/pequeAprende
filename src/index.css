@@ -85,6 +85,29 @@ body,
 }
 
 /* ═══════════════════════════════════════════
+   FONDO "TAPETE" — dirección visual para los juegos de tarjetas
+   (Colores, Números, Vocales, Animales, Figuras). Reemplaza los
+   fondos pastel difuminados (blobs semitransparentes sobre blanco)
+   que le quitaban viveza a los colores de las tarjetas encima.
+   ═══════════════════════════════════════════ */
+.play-mat-bg {
+  background-color: #F5EDDB;
+  background-image:
+    linear-gradient(#E3D5B4 1px, transparent 1px),
+    linear-gradient(90deg, #E3D5B4 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Grid que se autocentra sin importar cuántas tarjetas haya — antes
+   varios juegos usaban anchos en % con flex-wrap, lo que podía dejar
+   la última tarjeta huérfana y descuadrada en pantallas anchas. */
+.card-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 190px));
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════════
    ANIMACIONES CSS PURAS (0% JavaScript)
    Rendimiento: GPU compositor thread
    Batería: ~95% menos consumo que Framer Motion

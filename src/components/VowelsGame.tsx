@@ -117,26 +117,7 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col w-full relative overflow-hidden bg-sky-50 font-sans select-none">
-
-      {/* Fondo hiper-animado y alegre */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,transparent_100%)]">
-        <motion.div
-          animate={{ x: [0, 40, -20, 0], y: [0, -40, 20, 0], scale: [1, 1.2, 0.9, 1] }}
-          transition={{ duration: 12, ease: "easeInOut" }}
-          className="absolute top-[-10%] left-[-10%] w-64 md:w-96 h-64 md:h-96 bg-pink-300/50 rounded-full blur-[60px]"
-        />
-        <motion.div
-          animate={{ x: [0, -50, 30, 0], y: [0, 50, -40, 0], scale: [1, 1.3, 0.8, 1] }}
-          transition={{ duration: 15, ease: "easeInOut" }}
-          className="absolute bottom-[-10%] right-[-10%] w-72 md:w-[30rem] h-72 md:h-[30rem] bg-yellow-300/40 rounded-full blur-[60px]"
-        />
-        <motion.div
-          animate={{ x: [0, 30, -30, 0], y: [0, 30, -30, 0] }}
-          transition={{ duration: 10, ease: "easeInOut" }}
-          className="absolute top-[40%] left-[30%] w-48 md:w-80 h-48 md:h-80 bg-cyan-300/40 rounded-full blur-[50px]"
-        />
-      </div>
+    <div className="h-[100dvh] flex flex-col w-full relative overflow-hidden play-mat-bg font-sans select-none">
 
       {/* HEADER */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-1 sm:py-1.5 bg-white/80  shadow-sm rounded-b-2xl border-b-2 border-white">
@@ -200,7 +181,7 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center content-start gap-4 sm:gap-6 md:gap-8 w-full max-w-[1200px] mx-auto pb-6">
+          <div className="card-grid-auto gap-5 sm:gap-6 md:gap-8 w-full max-w-[1200px] mx-auto pb-6">
             {vowels.map((v, index) => (
               <motion.button
                 key={v.letter}
@@ -211,17 +192,14 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
                 whileTap={{ scale: 0.9, y: 10 }}
                 onPointerDown={(e) => handleVowelClick(e, v)}
                 className={`
-                  group relative w-[45%] sm:w-[30%] lg:w-[18%] max-w-[260px] aspect-square sm:aspect-[4/5]
-                  rounded-[2.5rem] sm:rounded-[3.5rem]
+                  group relative aspect-square
+                  rounded-[2.5rem] sm:rounded-[3rem]
                   flex flex-col items-center justify-center p-3 sm:p-5
-                  border-[4px] sm:border-[6px] border-white/80 text-white overflow-visible
+                  border-[6px] border-[#FFF8E9] text-white overflow-visible
                   transition-shadow duration-150
                   ${v.color} ${v.shadow} ${v.activeShadow}
                 `}
               >
-                <div className={`absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b ${v.light} to-transparent opacity-80 rounded-t-[2rem] pointer-events-none`} />
-                <div className="absolute top-[5%] left-[10%] w-[60%] h-[20%] bg-white/50 rounded-full blur-[2px] rotate-[-15deg] pointer-events-none" />
-
                 <div className="flex-1 w-full flex items-center justify-center relative z-10 pt-2">
                   <motion.span
                     animate={{
@@ -311,14 +289,13 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
                       disabled={locked}
                       className={`
                         w-20 h-20 sm:w-28 sm:h-28 rounded-[1.75rem] sm:rounded-[2.25rem]
-                        border-[4px] sm:border-[6px] border-white/90 transition-all duration-200
+                        border-[6px] border-[#FFF8E9] transition-all duration-200
                         flex items-center justify-center relative overflow-hidden text-white
                         ${option.color} ${!locked && option.activeShadow} ${option.shadow}
-                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-sky-50' : ''}
+                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-[#F5EDDB]' : ''}
                         touch-manipulation
                       `}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
                       <span className="text-3xl sm:text-5xl font-black drop-shadow-md relative z-10" style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.6)' }}>
                         {option.letter}
                       </span>

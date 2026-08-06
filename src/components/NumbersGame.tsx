@@ -120,7 +120,7 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col w-full overflow-hidden bg-gradient-to-b from-sky-50 via-blue-50 to-indigo-50 font-sans select-none">
+    <div className="h-[100dvh] flex flex-col w-full overflow-hidden play-mat-bg font-sans select-none">
 
       {/* HEADER COMPACTO Y ESTANDARIZADO */}
       <div className="relative z-20 flex items-center justify-between shrink-0 px-4 py-1.5 bg-white/80  shadow-sm rounded-b-2xl border-b-2 border-white">
@@ -184,15 +184,12 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
                     className={`
                       group relative aspect-square rounded-[1.5rem] sm:rounded-[2rem]
                       flex items-center justify-center transition-all duration-150
-                      border-2 sm:border-4 border-white/90
+                      border-4 border-[#FFF8E9]
                       ${style.bg} ${style.shadow} ${style.activeShadow}
                       ${style.text || 'text-white'}
                       touch-manipulation overflow-hidden
                     `}
                   >
-                    <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                    <div className="absolute top-[5%] left-[10%] w-[50%] h-[20%] bg-white/40 rounded-full blur-[1px] rotate-[-15deg] pointer-events-none" />
-
                     <motion.span
                       animate={activeNumber === num ? { scale: [1, 1.3, 1] } : { scale: 1 }}
                       className="text-3xl sm:text-5xl md:text-6xl font-black drop-shadow-[0_4px_4px_rgba(0,0,0,0.2)] relative z-10"
@@ -311,15 +308,14 @@ export default function NumbersGame({ onBack, isFirstTime, onVisit }: { onBack: 
                       disabled={locked}
                       className={`
                         w-20 h-20 sm:w-28 sm:h-28 rounded-[1.75rem] sm:rounded-[2.25rem]
-                        border-[4px] sm:border-[6px] border-white/90 transition-all duration-200
+                        border-[6px] border-[#FFF8E9] transition-all duration-200
                         flex items-center justify-center relative overflow-hidden
                         ${style.bg} ${!locked && style.activeShadow} ${style.shadow}
                         ${style.text || 'text-white'}
-                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-blue-50' : ''}
+                        ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-[#F5EDDB]' : ''}
                         touch-manipulation
                       `}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
                       <span className="text-3xl sm:text-4xl font-black drop-shadow-md relative z-10">{num}</span>
                     </motion.button>
                   );
