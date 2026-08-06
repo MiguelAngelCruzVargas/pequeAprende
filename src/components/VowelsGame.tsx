@@ -119,19 +119,15 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
       return;
     }
 
-    // Modo "Todo": palabra → repite conmigo (sílaba a sílaba) → letra+palabra
-    // → animación temática de premio.
+    // Modo "Todo": palabra → repite conmigo (sílabas en UNA sola locución,
+    // no una llamada de voz por sílaba — eso era lo que se sentía lento,
+    // cada llamada trae su propia pausa) → letra+palabra → animación.
     try {
       await speakAndWait(v.word);
       if (cancelled()) return;
 
-      await speakAndWait('Repite conmigo:');
+      await speakAndWait(`Repite conmigo: ${v.syllables.join('... ')}`);
       if (cancelled()) return;
-
-      for (const syllable of v.syllables) {
-        await speakAndWait(syllable);
-        if (cancelled()) return;
-      }
 
       await speakAndWait(`Esta es la ${v.letter} de ${v.word}`);
       if (cancelled()) return;
