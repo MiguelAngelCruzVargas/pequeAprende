@@ -1,14 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { speak } from '../lib/speech';
+import { motion, AnimatePresence, TargetAndTransition } from 'motion/react';
+import { speak, speakAndWait } from '../lib/speech';
 import { ArrowLeft, Sparkles, BookOpen, Star, Target, CheckCircle2, XCircle } from 'lucide-react';
 
+// Cada vocal tiene su propia animación de icono (no la misma para todas) —
+// para que "vuele" el avión, "camine pesado" el elefante, etc.
 const vowels = [
-  { letter: 'A', word: 'Avión', icon: '✈️', color: 'bg-red-500', shadow: 'shadow-[0_10px_0_#B91C1C]', activeShadow: 'active:shadow-[0_0px_0_#B91C1C]', light: 'from-red-300' },
-  { letter: 'E', word: 'Elefante', icon: '🐘', color: 'bg-blue-500', shadow: 'shadow-[0_10px_0_#1D4ED8]', activeShadow: 'active:shadow-[0_0px_0_#1D4ED8]', light: 'from-blue-300' },
-  { letter: 'I', word: 'Iguana', icon: '🦎', color: 'bg-emerald-500', shadow: 'shadow-[0_10px_0_#047857]', activeShadow: 'active:shadow-[0_0px_0_#047857]', light: 'from-emerald-300' },
-  { letter: 'O', word: 'Oso', icon: '🐻', color: 'bg-orange-500', shadow: 'shadow-[0_10px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]', light: 'from-orange-300' },
-  { letter: 'U', word: 'Uvas', icon: '🍇', color: 'bg-fuchsia-500', shadow: 'shadow-[0_10px_0_#701A75]', activeShadow: 'active:shadow-[0_0px_0_#701A75]', light: 'from-fuchsia-300' },
+  {
+    letter: 'A', word: 'Avión', syllables: ['A', 'vión'], icon: '✈️',
+    color: 'bg-red-500', shadow: 'shadow-[0_10px_0_#B91C1C]', activeShadow: 'active:shadow-[0_0px_0_#B91C1C]',
+    iconAnim: { x: [0, 20, 40, 20, 0], y: [0, -18, -30, -18, 0], rotate: [0, -8, -14, -8, 0] } as TargetAndTransition,
+  },
+  {
+    letter: 'E', word: 'Elefante', syllables: ['E', 'le', 'fan', 'te'], icon: '🐘',
+    color: 'bg-blue-500', shadow: 'shadow-[0_10px_0_#1D4ED8]', activeShadow: 'active:shadow-[0_0px_0_#1D4ED8]',
+    iconAnim: { y: [0, -10, 0, -10, 0], scale: [1, 1.06, 0.95, 1.06, 1] } as TargetAndTransition,
+  },
+  {
+    letter: 'I', word: 'Iguana', syllables: ['I', 'gua', 'na'], icon: '🦎',
+    color: 'bg-emerald-500', shadow: 'shadow-[0_10px_0_#047857]', activeShadow: 'active:shadow-[0_0px_0_#047857]',
+    iconAnim: { x: [0, -10, 10, -10, 0], rotate: [0, -10, 10, -10, 0] } as TargetAndTransition,
+  },
+  {
+    letter: 'O', word: 'Oso', syllables: ['O', 'so'], icon: '🐻',
+    color: 'bg-orange-500', shadow: 'shadow-[0_10px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]',
+    iconAnim: { rotate: [0, -14, 14, -14, 0], y: [0, -4, 0, -4, 0] } as TargetAndTransition,
+  },
+  {
+    letter: 'U', word: 'Uvas', syllables: ['U', 'vas'], icon: '🍇',
+    color: 'bg-fuchsia-500', shadow: 'shadow-[0_10px_0_#701A75]', activeShadow: 'active:shadow-[0_0px_0_#701A75]',
+    iconAnim: { y: [0, -32, 0, -14, 0, -6, 0], scale: [1, 1.1, 0.95, 1.05, 0.98, 1.02, 1] } as TargetAndTransition,
+  },
 ];
 
 type VowelItem = typeof vowels[0];
@@ -32,8 +54,14 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
   const hasSpoken = useRef(false);
   const [readMode, setReadMode] = useState<'letter' | 'full'>('full');
   const [activeVowel, setActiveVowel] = useState<string | null>(null);
+  // Se activa DESPUÉS de la secuencia de voz (palabra → repite → letra),
+  // como recompensa — no al instante del toque, para no pisar la locución.
+  const [themeAnimVowel, setThemeAnimVowel] = useState<string | null>(null);
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
   const burstId = useRef(0);
+  // Permite que tocar una vocal nueva corte la secuencia de la anterior en
+  // vez de que se encimen (mismo patrón que RepeatGame).
+  const flowIdRef = useRef(0);
 
   const [mode, setMode] = useState<Mode>('aprende');
   const [quiz, setQuiz] = useState<{ target: VowelItem; options: VowelItem[] } | null>(null);
@@ -54,8 +82,9 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
     }
   }, [isFirstTime, onVisit]);
 
-  const handleVowelClick = (e: React.PointerEvent, v: VowelItem) => {
+  const handleVowelClick = async (e: React.PointerEvent, v: VowelItem) => {
     setActiveVowel(v.letter);
+    setThemeAnimVowel(null);
 
     const clientX = e.clientX;
     const clientY = e.clientY;
@@ -66,13 +95,43 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
       setBursts(prev => prev.filter(b => b.id !== newBurst.id));
     }, 1000);
 
+    // Tocar otra vocal corta esta secuencia a la mitad en vez de encimarse.
+    const myFlowId = ++flowIdRef.current;
+    const cancelled = () => flowIdRef.current !== myFlowId;
+
     if (readMode === 'letter') {
+      // Modo rápido: solo el sonido de la letra, sin la secuencia larga.
       speak(v.letter.toLowerCase());
-    } else {
-      speak(`${v.letter.toLowerCase()} de ${v.word}`);
+      setTimeout(() => setActiveVowel(null), 800);
+      return;
     }
 
-    setTimeout(() => setActiveVowel(null), 800);
+    // Modo "Todo": palabra → repite conmigo (sílaba a sílaba) → letra+palabra
+    // → animación temática de premio.
+    try {
+      await speakAndWait(v.word);
+      if (cancelled()) return;
+
+      await speakAndWait('Repite conmigo:');
+      if (cancelled()) return;
+
+      for (const syllable of v.syllables) {
+        await speakAndWait(syllable);
+        if (cancelled()) return;
+      }
+
+      await speakAndWait(`Esta es la ${v.letter} de ${v.word}`);
+      if (cancelled()) return;
+
+      setActiveVowel(null);
+      setThemeAnimVowel(v.letter);
+      setTimeout(() => {
+        if (!cancelled()) setThemeAnimVowel(null);
+      }, 1600);
+    } catch (err: any) {
+      if (err?.message !== '__MUTED__') throw err;
+      setActiveVowel(null);
+    }
   };
 
   const startPractica = () => {
@@ -219,8 +278,13 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
 
                 <div className="flex flex-col items-center gap-1 sm:gap-2 relative z-10 pb-1">
                   <motion.span
-                    animate={activeVowel === v.letter ? { scale: [1, 1.5, 1], y: [0, -20, 0] } : {}}
-                    transition={{ duration: 0.6, type: "spring" }}
+                    animate={
+                      themeAnimVowel === v.letter ? v.iconAnim :
+                      activeVowel === v.letter ? { scale: [1, 1.5, 1], y: [0, -20, 0] } : {}
+                    }
+                    transition={
+                      themeAnimVowel === v.letter ? { duration: 1.4, ease: 'easeInOut' } : { duration: 0.6, type: "spring" }
+                    }
                     className="text-6xl sm:text-7xl lg:text-[6rem] leading-none drop-shadow-xl"
                   >
                     {v.icon}
