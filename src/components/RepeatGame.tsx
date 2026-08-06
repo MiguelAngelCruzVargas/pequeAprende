@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak, speakAndWait } from '../lib/speech';
-import { listenToChild, isRecognitionSupported } from '../lib/speechRecognition';
+import { listenToChild, canUseVoicePractice } from '../lib/speechRecognition';
 import { useAI } from '../lib/aiContext';
 import { ArrowLeft, Sparkles, Brain, Volume2, Hand, RotateCcw, ChevronRight, Home, Mic } from 'lucide-react';
 
@@ -115,9 +115,21 @@ export default function RepeatGame({ onBack, isFirstTime, onVisit }: { onBack: (
   const hasSpoken = useRef(false);
   const flowIdRef = useRef(0);
   const [isListening, setIsListening] = useState(false);
-  const [listenFeedback, setListenFeedback] = useState<{ heard: string; match: 'perfect' | 'close' | 'miss' } | null>(null);
+  const [listenFeedback, setListenFeedback] = useState<{ heard: string; match: 'perfect' | 'close' | 'miss'; permissionDenied?: boolean } | null>(null);
   const [attempts, setAttempts] = useState(0);
-  const micSupported = isRecognitionSupported();
+  // La IA (usada en Safari/iPad para transcribir) es un EXTRA opcional: el
+  // botón de micrófono solo aparece si de verdad va a funcionar (nativo del
+  // navegador, o servidor de IA confirmado arriba). Si nunca está disponible
+  // o falla en caliente, el juego sigue completo con el botón "¡Lo dije!".
+  const [micSupported, setMicSupported] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    canUseVoicePractice().then((ok) => {
+      if (!cancelled) setMicSupported(ok);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const words = allWords.filter(w => w.level === currentLevel);
@@ -298,13 +310,25 @@ export default function RepeatGame({ onBack, isFirstTime, onVisit }: { onBack: (
       // Dar instrucción breve
       await speakAndWait('¡Te escucho! Di la palabra.');
       
-      // Escuchar al niño (5 segundos máximo)
+      // Escuchar al niño (6 segundos máximo)
       const result = await listenToChild(round.word, 6000);
       setIsListening(false);
-      setListenFeedback({ heard: result.heard, match: result.match });
+
+      if (result.serviceUnavailable) {
+        // El servidor de IA falló (no el niño). Nunca es su culpa, así que no
+        // le mostramos ningún mensaje de error: simplemente dejamos de
+        // ofrecer el micrófono y el juego sigue con "¡Lo dije!" como siempre.
+        setMicSupported(false);
+        return;
+      }
+
+      setListenFeedback({ heard: result.heard, match: result.match, permissionDenied: result.permissionDenied });
       setAttempts(a => a + 1);
-      
-      if (result.match === 'perfect') {
+
+      if (result.permissionDenied) {
+        // No confundir "no diste permiso" con "no te escuché bien" — son problemas distintos.
+        await speakAndWait('No puedo usar el micrófono. Pide a un adulto que active el permiso en Ajustes.');
+      } else if (result.match === 'perfect') {
         // ¡Lo dijo bien!
         const perfectPhrases = [
           `¡Perfecto! Dijiste ${round.word} muy bien`,
@@ -494,27 +518,33 @@ export default function RepeatGame({ onBack, isFirstTime, onVisit }: { onBack: (
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8 }}
               className={`max-w-xs md:max-w-md  border-4 rounded-[2rem] px-5 py-3 flex items-center gap-3 shadow-xl ${
+                listenFeedback.permissionDenied ? 'bg-orange-50/95 border-orange-300' :
                 listenFeedback.match === 'perfect' ? 'bg-green-50/95 border-green-300' :
                 listenFeedback.match === 'close' ? 'bg-amber-50/95 border-amber-300' :
                 'bg-red-50/95 border-red-200'
               }`}
             >
-              <span className="text-3xl">{listenFeedback.match === 'perfect' ? '🎉' : listenFeedback.match === 'close' ? '👍' : '💪'}</span>
+              <span className="text-3xl">{listenFeedback.permissionDenied ? '🔇' : listenFeedback.match === 'perfect' ? '🎉' : listenFeedback.match === 'close' ? '👍' : '💪'}</span>
               <div>
                 <p className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
+                  listenFeedback.permissionDenied ? 'text-orange-500' :
                   listenFeedback.match === 'perfect' ? 'text-green-500' :
                   listenFeedback.match === 'close' ? 'text-amber-500' : 'text-red-400'
                 }`}>
-                  {listenFeedback.match === 'perfect' ? '¡Perfecto!' : listenFeedback.match === 'close' ? '¡Casi!' : '¡Otra vez!'}
+                  {listenFeedback.permissionDenied ? 'Sin permiso' : listenFeedback.match === 'perfect' ? '¡Perfecto!' : listenFeedback.match === 'close' ? '¡Casi!' : '¡Otra vez!'}
                 </p>
-                {listenFeedback.heard ? (
+                {listenFeedback.permissionDenied ? (
+                  <p className="text-xs md:text-sm font-black text-slate-700 leading-tight">
+                    Activa el micrófono en Ajustes para este sitio
+                  </p>
+                ) : listenFeedback.heard ? (
                   <p className="text-xs md:text-sm font-black text-slate-700 leading-tight">
                     Escuché: "{listenFeedback.heard}"
                   </p>
                 ) : (
                   <p className="text-xs md:text-sm font-bold text-slate-500 leading-tight">No te escuché, acércate más</p>
                 )}
-                {attempts > 0 && <p className="text-[10px] text-slate-400 font-bold mt-0.5">Intento {attempts}</p>}
+                {!listenFeedback.permissionDenied && attempts > 0 && <p className="text-[10px] text-slate-400 font-bold mt-0.5">Intento {attempts}</p>}
               </div>
             </motion.div>
           )}

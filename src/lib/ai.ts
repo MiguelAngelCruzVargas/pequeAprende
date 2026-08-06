@@ -3,7 +3,15 @@
  * Connects to the local AI backend proxy. Never exposes API keys to the browser.
  */
 
-const AI_BASE = 'http://localhost:3001/api/ai';
+// El backend de IA corre en un puerto aparte (server/index.js). Si usamos
+// "localhost" fijo, cualquier dispositivo que abra la app por IP de LAN
+// (p. ej. un iPad) apuntaría al propio dispositivo y todo fallaría en
+// silencio. Derivamos el host desde la URL con la que se cargó la página.
+const AI_PORT = 3001;
+export const AI_BASE =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:${AI_PORT}/api/ai`
+    : `http://localhost:${AI_PORT}/api/ai`;
 
 export type AIProvider = 'groq' | 'gemini' | 'openai' | 'deepseek' | 'auto';
 

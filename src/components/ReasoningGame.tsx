@@ -1,24 +1,49 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '../lib/speech';
-import { CheckCircle2, Brain, ArrowLeft, Sparkles } from 'lucide-react';
+import { CheckCircle2, XCircle, Brain, ArrowLeft, Sparkles } from 'lucide-react';
 
-// Dejamos el hex para el color de fondo seguro, y las clases de Tailwind para las sombras
-const colors = [
-  { name: 'Rojo', hex: '#EF4444', shadow: 'shadow-[0_8px_0_#B91C1C]', activeShadow: 'active:shadow-[0_0px_0_#B91C1C]' },
-  { name: 'Azul', hex: '#3B82F6', shadow: 'shadow-[0_8px_0_#1D4ED8]', activeShadow: 'active:shadow-[0_0px_0_#1D4ED8]' },
-  { name: 'Verde', hex: '#10B981', shadow: 'shadow-[0_8px_0_#047857]', activeShadow: 'active:shadow-[0_0px_0_#047857]' },
-  { name: 'Amarillo', hex: '#FACC15', shadow: 'shadow-[0_8px_0_#CA8A04]', activeShadow: 'active:shadow-[0_0px_0_#CA8A04]' },
-  { name: 'Morado', hex: '#A855F7', shadow: 'shadow-[0_8px_0_#7E22CE]', activeShadow: 'active:shadow-[0_0px_0_#7E22CE]' },
-  { name: 'Naranja', hex: '#F97316', shadow: 'shadow-[0_8px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]' },
+// "Pensar" es el juego de categorización/clasificación de la app: de un
+// grupo de 4 cosas, tres son de la misma categoría y una no pertenece.
+// Es una habilidad de razonamiento distinta a "encontrar el color X" (eso
+// ya lo cubre el modo Practica de Colores) — aquí el niño tiene que
+// reconocer QUÉ tienen en común las cosas para detectar cuál sobra.
+interface Category {
+  name: string;
+  intro: string;      // qué se dice al iniciar la ronda
+  correction: string;  // qué se dice cuando falla
+  items: string[];
+}
+
+const CATEGORIES: Category[] = [
+  { name: 'frutas', intro: 'Todo esto son frutas, menos una. ¿Cuál NO es una fruta?', correction: 'Esa sí es una fruta. ¡Busca la diferente!', items: ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉', '🍍'] },
+  { name: 'animales', intro: 'Todo esto son animales, menos uno. ¿Cuál NO es un animal?', correction: 'Ese sí es un animal. ¡Busca el diferente!', items: ['🐶', '🐱', '🐮', '🐰', '🦁', '🐵', '🐘'] },
+  { name: 'vehículos', intro: 'Todo esto son vehículos, menos uno. ¿Cuál NO es un vehículo?', correction: 'Ese sí es un vehículo. ¡Busca el diferente!', items: ['🚗', '🚌', '🚲', '🚂', '✈️', '🚁', '🚓'] },
+  { name: 'juguetes', intro: 'Todo esto son juguetes, menos uno. ¿Cuál NO es un juguete?', correction: 'Ese sí es un juguete. ¡Busca el diferente!', items: ['⚽', '🧸', '🪀', '🎈', '🎲', '🪁', '🎯'] },
 ];
 
-function buildRound() {
-  const newTarget = colors[Math.floor(Math.random() * colors.length)];
-  const distractors = colors.filter(c => c.name !== newTarget.name);
-  const shuffled = [...distractors].sort(() => Math.random() - 0.5).slice(0, 2);
-  const opts = [...shuffled, newTarget].sort(() => Math.random() - 0.5);
-  return { target: newTarget, options: opts };
+interface RoundOption {
+  emoji: string;
+  isOdd: boolean;
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildRound(): { category: Category; options: RoundOption[] } {
+  const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+  const groupEmojis = shuffle(category.items).slice(0, 3);
+  const otherCategories = CATEGORIES.filter(c => c.name !== category.name);
+  const oddCategory = otherCategories[Math.floor(Math.random() * otherCategories.length)];
+  const oddEmoji = oddCategory.items[Math.floor(Math.random() * oddCategory.items.length)];
+
+  const options = shuffle([
+    ...groupEmojis.map(emoji => ({ emoji, isOdd: false })),
+    { emoji: oddEmoji, isOdd: true },
+  ]);
+
+  return { category, options };
 }
 
 export default function ReasoningGame({ onBack, isFirstTime, onVisit }: { onBack: () => void, isFirstTime: boolean, onVisit: () => void }) {
@@ -33,7 +58,7 @@ export default function ReasoningGame({ onBack, isFirstTime, onVisit }: { onBack
     setRound(next);
     setStatus('idle');
     setLocked(false);
-    setTimeout(() => speak(`¿Dónde está el color ${next.target.name}?`), 200);
+    setTimeout(() => speak(next.category.intro), 200);
   }, []);
 
   useEffect(() => {
@@ -41,32 +66,32 @@ export default function ReasoningGame({ onBack, isFirstTime, onVisit }: { onBack
     hasSpokenOnMount.current = true;
 
     if (isFirstTime) {
-      speak('¡Hola! Voy a pedirte un color. ¡Tócalo fuerte!');
+      speak('¡Hola! Vamos a pensar juntos. Busca la cosa diferente.');
       onVisit();
-      setTimeout(() => speak(`¿Dónde está el color ${round.target.name}?`, false), 3800);
+      setTimeout(() => speak(round.category.intro, false), 3200);
     } else {
-      setTimeout(() => speak(`¿Dónde está el color ${round.target.name}?`), 300);
+      setTimeout(() => speak(round.category.intro), 300);
     }
-  }, [isFirstTime, onVisit, round.target.name]);
+  }, [isFirstTime, onVisit, round.category.intro]);
 
-  const handleChoice = (choice: typeof colors[0]) => {
+  const handleChoice = (option: RoundOption) => {
     if (locked || status !== 'idle') return;
     setLocked(true);
 
-    if (choice.name === round.target.name) {
+    if (option.isOdd) {
       setStatus('correct');
       setStars(s => s + 1);
       const praise = [
-        '¡Lo encontraste! ¡Eres muy listo!',
-        '¡Así se hace! ¡Muy bien!',
-        '¡Perfecto! ¡Ese es!',
-        '¡Genial! Lo lograste.',
+        '¡Eso es! ¡Muy buena mirada!',
+        '¡Así se hace! ¡Ese no pertenece!',
+        '¡Perfecto! ¡Lo pensaste genial!',
+        '¡Excelente! ¡Eres muy listo!',
       ];
       speak(praise[Math.floor(Math.random() * praise.length)]);
       setTimeout(goNextRound, 2500);
     } else {
       setStatus('wrong');
-      speak('Mmm, ese no es. ¡Busca bien!');
+      speak(round.category.correction);
       setTimeout(() => {
         setStatus('idle');
         setLocked(false);
@@ -109,90 +134,59 @@ export default function ReasoningGame({ onBack, isFirstTime, onVisit }: { onBack
       <div className="flex-grow flex flex-col items-center justify-start gap-4 sm:gap-8 w-full px-4 pt-6 pb-12 overflow-y-auto custom-scrollbar relative z-10">
 
         {/* Pregunta animada */}
-        <div className="h-16 flex items-center justify-center shrink-0">
+        <div className="min-h-16 flex items-center justify-center shrink-0 max-w-lg">
           <AnimatePresence mode="wait">
             <motion.p
-              key={round.target.name}
+              key={round.category.name}
               initial={{ opacity: 0, y: -16, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.9 }}
-              className="text-2xl sm:text-4xl font-black text-slate-700 text-center drop-shadow-sm"
+              className="text-xl sm:text-3xl font-black text-slate-700 text-center drop-shadow-sm px-2"
             >
-              ¿Dónde está el <span className="text-purple-600 bg-white/50 px-3 py-1 rounded-full border-2 border-white/50">{round.target.name}</span>?
+              ¿Cuál <span className="text-purple-600 bg-white/50 px-3 py-1 rounded-full border-2 border-white/50">NO pertenece</span> al grupo?
             </motion.p>
           </AnimatePresence>
         </div>
 
-        {/* Círculo Objetivo (Estilo Gominola Grande) */}
-        <div className="shrink-0 relative flex flex-col items-center gap-4">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`target-${round.target.name}`}
-              initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
-              animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-              style={{ backgroundColor: round.target.hex }}
-              className="w-40 h-40 sm:w-56 sm:h-56 rounded-full shadow-md border-[10px] sm:border-[16px] border-white/90 flex items-center justify-center relative overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-              <div className="absolute top-[10%] left-[15%] w-1/3 h-1/4 bg-white/40 rounded-full blur-[2px] rotate-[-30deg] pointer-events-none" />
-
-              <AnimatePresence>
-                {status === 'correct' && (
-                  <motion.div
-                    initial={{ scale: 0, rotate: -90 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    exit={{ scale: 0 }}
-                    className="absolute z-10"
-                  >
-                    <CheckCircle2 className="w-24 h-24 sm:w-32 sm:h-32 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)]" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Opciones (Botones 3D Gominola) */}
+        {/* Las 4 opciones — 3 de la misma categoría + 1 diferente */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={`options-${round.target.name}`}
-            className="flex flex-wrap justify-center gap-4 sm:gap-8 mt-4 sm:mt-8 w-full max-w-2xl px-2"
+            key={`options-${round.category.name}-${round.options.map(o => o.emoji).join('')}`}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mt-2 w-full max-w-2xl px-2"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.3 }}
           >
             {round.options.map((option, i) => {
-              const isCorrect = option.name === round.target.name;
-
               let buttonAnimation = {};
-              if (status === 'wrong' && !isCorrect) buttonAnimation = { scale: 0.85, opacity: 0.5 };
-              if (status === 'correct' && isCorrect) buttonAnimation = { scale: [1, 1.1, 1], rotate: [0, -5, 5, 0] };
+              if (status === 'wrong' && !option.isOdd) buttonAnimation = {};
+              if (status === 'correct' && option.isOdd) buttonAnimation = { scale: [1, 1.15, 1], rotate: [0, -6, 6, 0] };
+              if (status !== 'idle' && !option.isOdd) buttonAnimation = { scale: 0.9, opacity: 0.6 };
 
               return (
                 <motion.button
-                  key={`${option.name}-${i}`}
+                  key={`${option.emoji}-${i}`}
                   initial={{ scale: 0.7, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1, ...buttonAnimation }}
                   transition={{ delay: i * 0.08, type: 'spring' }}
                   whileHover={!locked ? { scale: 1.05 } : {}}
-                  whileTap={!locked ? { scale: 0.95, y: 10 } : {}}
+                  whileTap={!locked ? { scale: 0.95, y: 8 } : {}}
                   onPointerDown={() => handleChoice(option)}
                   disabled={locked}
-                  style={{ backgroundColor: option.hex }}
                   className={`
-                    w-24 h-24 sm:w-36 sm:h-36 rounded-[2rem] sm:rounded-[2.5rem] 
+                    w-full aspect-square rounded-[2rem] sm:rounded-[2.5rem]
                     border-[4px] sm:border-[6px] border-white/90 transition-all duration-200
                     flex items-center justify-center relative overflow-hidden
-                    ${option.shadow} ${!locked && option.activeShadow}
-                    ${status === 'correct' && isCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-green-50' : ''}
+                    bg-gradient-to-b from-white to-slate-100
+                    shadow-[0_10px_0_#CBD5E1,0_15px_20px_rgba(0,0,0,0.08)]
+                    ${!locked ? 'active:shadow-[0_0px_0_#CBD5E1]' : ''}
+                    ${status === 'correct' && option.isOdd ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-purple-50 from-green-50 to-emerald-100' : ''}
                     touch-manipulation
                   `}
                 >
-                  <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-                  <div className="absolute top-[10%] left-[15%] w-1/3 h-1/4 bg-white/40 rounded-full blur-[1px] rotate-[-30deg] pointer-events-none" />
+                  <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
+                  <span className="text-5xl sm:text-7xl drop-shadow-md relative z-10">{option.emoji}</span>
                 </motion.button>
               );
             })}
@@ -215,7 +209,8 @@ export default function ReasoningGame({ onBack, isFirstTime, onVisit }: { onBack
                   : 'bg-gradient-to-r from-orange-400 to-red-500 shadow-[0_10px_0_#991B1B,0_20px_40px_rgba(239,68,68,0.4)]'}
               `}
             >
-              {status === 'correct' ? '🌟 ¡LO ENCONTRASTE!' : '🔍 ¡SIGUE BUSCANDO!'}
+              {status === 'correct' ? <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" /> : <XCircle className="w-8 h-8 sm:w-10 sm:h-10 animate-pulse" />}
+              {status === 'correct' ? '¡LO ENCONTRASTE!' : '¡SIGUE PENSANDO!'}
             </motion.div>
           )}
         </AnimatePresence>

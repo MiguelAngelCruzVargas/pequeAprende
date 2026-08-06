@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { rateLimit } from 'express-rate-limit';
+import { rateLimit, ipKeyGenerator } from 'express-rate-limit';
 import { PROVIDERS, getAvailableProviders } from '../providers/registry.js';
-import { callProvider } from '../providers/callers.js';
+import { callProvider, transcribeAudio } from '../providers/callers.js';
 
 const router = Router();
 
@@ -12,7 +12,9 @@ Object.entries(PROVIDERS).forEach(([id, cfg]) => {
   providerLimiters[id] = rateLimit({
     windowMs: cfg.rateLimit.windowMs,
     max: cfg.rateLimit.max,
-    keyGenerator: (req) => `${id}-${req.ip}`,
+    // ipKeyGenerator normaliza IPv6 correctamente (si no, express-rate-limit
+    // v8 lanza ValidationError en cada arranque y IPv6 podría saltarse el límite).
+    keyGenerator: (req) => `${id}-${ipKeyGenerator(req.ip)}`,
     message: {
       error: 'PROVIDER_RATE_LIMIT',
       provider: id,
@@ -23,6 +25,20 @@ Object.entries(PROVIDERS).forEach(([id, cfg]) => {
     standardHeaders: 'draft-7',
     legacyHeaders: false,
   });
+});
+
+// ─── Rate Limiter para transcripción de voz ──────────────────────────────────
+// Grabaciones cortas (3-6s del niño repitiendo una palabra), pero limitamos
+// para no abusar de la cuota gratuita de Groq.
+const transcribeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: {
+    error: 'TRANSCRIBE_RATE_LIMIT',
+    message: '⏳ Demasiados intentos de voz seguidos. Espera un momento.',
+  },
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
 });
 
 // ─── Educational System Prompt ────────────────────────────────────────────────
@@ -123,7 +139,7 @@ router.post('/hint', async (req, res) => {
       repeat:     `El niño practica decir la palabra "${item}". Anímalo a repetirla sílaba por sílaba.`,
       soundguess: `El niño escucha el sonido de un "${item}". Da una pista de cómo suena. 1 oración.`,
       matching:   `El niño busca la pareja de "${item}". Da una pista descriptiva. 1 oración.`,
-      reasoning:  `El niño busca el color "${item}". Ayúdalo a encontrarlo de forma divertida. 1 oración.`,
+      reasoning:  `El niño busca qué elemento no pertenece al grupo de "${item}". Dale una pista sin decirle la respuesta. 1 oración.`,
     };
 
     const prompt = hintPrompts[game] || `Ayuda al niño con "${item}" en el juego "${game}". 1 oración.`;
@@ -157,6 +173,25 @@ router.post('/celebrate', async (req, res) => {
   }
 });
 
+// ─── POST /api/ai/transcribe ──────────────────────────────────────────────────
+// Convierte a texto una grabación corta del niño repitiendo una palabra.
+// Es el respaldo para navegadores (Safari/iPad) que no tienen SpeechRecognition
+// nativo — el cliente graba con MediaRecorder y manda el audio en base64 aquí.
+router.post('/transcribe', transcribeLimiter, async (req, res) => {
+  try {
+    const { audioBase64, mimeType = 'audio/webm' } = req.body;
+
+    if (!audioBase64 || typeof audioBase64 !== 'string') {
+      return res.status(400).json({ error: 'INVALID_REQUEST', message: 'Se requiere audio.' });
+    }
+
+    const text = await transcribeAudio(audioBase64, mimeType);
+    res.json({ text });
+  } catch (err) {
+    handleAIError(err, res);
+  }
+});
+
 // ─── GET /api/ai/providers ───────────────────────────────────────────────────
 // Returns available providers and their capabilities (no keys exposed)
 router.get('/providers', (_req, res) => {
@@ -183,6 +218,7 @@ function handleAIError(err, res) {
     GEMINI_NOT_CONFIGURED:  { status: 503, message: '⚠️ Gemini no está configurado.' },
     OPENAI_NOT_CONFIGURED:  { status: 503, message: '⚠️ OpenAI no está configurado.' },
     DEEPSEEK_NOT_CONFIGURED:{ status: 503, message: '⚠️ DeepSeek no está configurado.' },
+    INVALID_AUDIO:          { status: 400, message: '⚠️ No se pudo leer el audio grabado.' },
   };
 
   const known = knownErrors[err.message];

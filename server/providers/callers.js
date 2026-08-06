@@ -1,4 +1,4 @@
-import Groq from 'groq-sdk';
+import Groq, { toFile } from 'groq-sdk';
 import OpenAI from 'openai';
 import { PROVIDERS } from './registry.js';
 
@@ -51,6 +51,83 @@ export async function callGroq(messages, systemPrompt) {
     }, { signal: controller.signal });
 
     return response.choices[0]?.message?.content?.trim() || '';
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ─── Transcribe Audio (Groq Whisper) ──────────────────────────────────────────
+// Usado por RepeatGame en dispositivos donde el navegador no tiene reconocimiento
+// de voz nativo (Safari/iPad no implementa window.SpeechRecognition). El niño
+// graba con MediaRecorder en el cliente y aquí lo convertimos a texto.
+const MIME_TO_EXT = {
+  'audio/webm': 'webm',
+  'audio/mp4': 'mp4',
+  'audio/aac': 'aac',
+  'audio/mpeg': 'mp3',
+  'audio/mp3': 'mp3',
+  'audio/wav': 'wav',
+  'audio/wave': 'wav',
+  'audio/x-wav': 'wav',
+  'audio/ogg': 'ogg',
+};
+
+function extensionForMime(mimeType) {
+  const base = (mimeType || '').split(';')[0].trim().toLowerCase();
+  return MIME_TO_EXT[base] || 'webm';
+}
+
+export async function transcribeAudio(base64Audio, mimeType = 'audio/webm') {
+  if (!base64Audio) throw new Error('INVALID_AUDIO');
+  const buffer = Buffer.from(base64Audio, 'base64');
+  const filename = `speech.${extensionForMime(mimeType)}`;
+
+  try {
+    return await transcribeWithGroq(buffer, filename, mimeType);
+  } catch (groqError) {
+    // Groq falló (sin cuenta configurada, o el modelo Whisper bloqueado a nivel
+    // de organización en console.groq.com/settings/limits). Si hay OpenAI
+    // configurado, lo usamos como respaldo — mismo patrón que el resto del chat.
+    if (process.env.OPENAI_API_KEY) {
+      return transcribeWithOpenAI(buffer, filename, mimeType);
+    }
+    throw groqError;
+  }
+}
+
+async function transcribeWithGroq(buffer, filename, mimeType) {
+  const client = getGroq();
+  if (!client) throw new Error('GROQ_NOT_CONFIGURED');
+
+  const file = await toFile(buffer, filename, { type: mimeType });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const transcription = await client.audio.transcriptions.create(
+      { file, model: 'whisper-large-v3-turbo', language: 'es', temperature: 0 },
+      { signal: controller.signal }
+    );
+    return (transcription?.text || '').trim();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function transcribeWithOpenAI(buffer, filename, mimeType) {
+  const client = getOpenAI();
+  if (!client) throw new Error('OPENAI_NOT_CONFIGURED');
+
+  const file = await toFile(buffer, filename, { type: mimeType });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+
+  try {
+    const transcription = await client.audio.transcriptions.create(
+      { file, model: 'whisper-1', language: 'es', temperature: 0 },
+      { signal: controller.signal }
+    );
+    return (transcription?.text || '').trim();
   } finally {
     clearTimeout(timeout);
   }
