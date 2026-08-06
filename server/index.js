@@ -8,11 +8,19 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { createRequire } from 'module';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // Routes
 import aiRoutes from './routes/ai.js';
 
 dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// dist/ = build de Vite (npm run build), un nivel arriba de server/.
+const distPath = path.join(__dirname, '..', 'dist');
+const hasFrontendBuild = fs.existsSync(distPath);
 
 const app = express();
 // Render (y la mayoría de PaaS) asignan su propio puerto dinámico y lo pasan
@@ -23,7 +31,10 @@ const PORT = process.env.PORT || process.env.AI_SERVER_PORT || 3001;
 // ─── Security & Middleware ───────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
-  origin: process.env.APP_URL || 'http://localhost:3000',
+  // Si servimos el frontend desde este mismo proceso (deploy combinado),
+  // el navegador nunca manda Origin distinto y CORS no aplica — pero lo
+  // dejamos abierto igual por si en algún momento separan los servicios.
+  origin: process.env.APP_URL || true,
   credentials: true,
 }));
 app.use(express.json({ limit: '2mb' }));  // Limit payload to 2MB max
@@ -49,7 +60,19 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// 404 handler
+// ─── Frontend (deploy combinado) ──────────────────────────────────────────────
+// Si dist/ existe (se corrió `npm run build`), este mismo proceso sirve la
+// app además de la API — un solo servicio en Render, sin CORS que pelear ni
+// URLs cruzadas que configurar. En desarrollo local (npm run dev + npm run
+// server por separado) dist/ no existe y esto simplemente no aplica.
+if (hasFrontendBuild) {
+  app.use(express.static(distPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// 404 handler (rutas de API que no matchean, o modo backend-only sin dist/)
 app.use((_req, res) => {
   res.status(404).json({ error: 'NOT_FOUND' });
 });

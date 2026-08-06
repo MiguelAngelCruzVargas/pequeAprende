@@ -3,25 +3,28 @@
  * Connects to the local AI backend proxy. Never exposes API keys to the browser.
  */
 
-// El backend de IA (server/index.js) puede vivir en tres sitios distintos
-// según dónde se corra la app, así que resolvemos la URL en este orden:
+// El backend de IA (server/index.js) puede vivir en distintos sitios según
+// cómo se despliegue la app, así que resolvemos la URL en este orden:
 //
-// 1. VITE_AI_BASE_URL — variable de entorno fijada en el build (Render,
-//    Vercel, etc.), para cuando el frontend y el backend están en dominios
-//    completamente distintos (p. ej. https://mi-api.onrender.com/api/ai).
-//    Vite la inyecta en build time por el prefijo VITE_, no hace falta
-//    tocar vite.config.ts.
-// 2. Si no existe, asumimos que el backend está en el mismo host pero en
-//    el puerto 3001 (setup local: npm run dev + npm run server, incluido
-//    abrir la app desde un iPad por IP de LAN).
+// 1. VITE_AI_BASE_URL — variable de entorno fijada en el build, solo hace
+//    falta si frontend y backend viven en dominios DISTINTOS (deploy
+//    separado en dos servicios). Vite la inyecta en build time por el
+//    prefijo VITE_, no hace falta tocar vite.config.ts.
+// 2. En desarrollo local (npm run dev) asumimos que el backend está en el
+//    mismo host pero en el puerto 3001 (setup local: npm run dev + npm run
+//    server por separado, incluido abrir la app desde un iPad por LAN).
+// 3. En producción sin esa variable, asumimos deploy combinado: el mismo
+//    server/index.js sirve la app Y la API (ver server/index.js), así que
+//    una ruta relativa basta — mismo origen, sin CORS que configurar.
 const AI_PORT = 3001;
 const envAiBase = (import.meta as any).env?.VITE_AI_BASE_URL as string | undefined;
+const isDev = !!(import.meta as any).env?.DEV;
 
 export const AI_BASE = envAiBase
   ? envAiBase.replace(/\/$/, '')
-  : typeof window !== 'undefined'
+  : isDev && typeof window !== 'undefined'
     ? `${window.location.protocol}//${window.location.hostname}:${AI_PORT}/api/ai`
-    : `http://localhost:${AI_PORT}/api/ai`;
+    : '/api/ai';
 
 export type AIProvider = 'groq' | 'gemini' | 'openai' | 'deepseek' | 'auto';
 
