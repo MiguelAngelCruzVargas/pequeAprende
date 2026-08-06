@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '../lib/speech';
-import { useAI } from '../lib/aiContext';
 import { CheckCircle2, XCircle, ArrowLeft, CopyPlus, Star } from 'lucide-react';
 import TutorOwl from './TutorOwl';
 
@@ -15,7 +14,6 @@ const items = [
 ];
 
 export default function MatchingGame({ userName, onBack, isFirstTime, onVisit }: { userName: string, onBack: () => void, isFirstTime: boolean, onVisit: () => void }) {
-  const { isEnabled: aiEnabled } = useAI();
   const [target, setTarget] = useState(items[0]);
   const [options, setOptions] = useState<typeof items>([]);
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
@@ -60,15 +58,28 @@ export default function MatchingGame({ userName, onBack, isFirstTime, onVisit }:
     if (choice.id === target.id) {
       setStatus('correct');
       setStars(s => s + 1);
-      const successPhrases = aiEnabled
-        ? [`¡Felicidades ${niño}! Tu cerebro con IA es asombroso. ✨`, `¡Wow ${niño}! Un análisis perfecto.`]
-        : [`¡Felicidades ${niño}! Eres increíble.`, `¡Excelente ${niño}! Son igualitos.`];
+      const successPhrases = [
+        `¡Felicidades ${niño}! Eres increíble.`,
+        `¡Excelente ${niño}! Son igualitos.`,
+        `¡Muy bien ${niño}! ¡Las encontraste!`,
+        `¡Genial ${niño}! ¡Qué buen ojo!`,
+        `¡Perfecto ${niño}! ¡Lo lograste!`,
+        `¡Bravo ${niño}! ¡Así se hace!`,
+        `¡Increíble ${niño}! ¡Sigue así!`,
+        `¡Wow ${niño}! ¡Eres un experto encontrando parejas!`,
+      ];
 
       speak(successPhrases[Math.floor(Math.random() * successPhrases.length)]);
       setTimeout(() => generateRound(), 4000);
     } else {
       setStatus('wrong');
-      speak(`Mmm, esa no es. ¡Vamos a intentarlo de nuevo, ${niño}!`);
+      const wrongPhrases = [
+        `Mmm, esa no es. ¡Vamos a intentarlo de nuevo, ${niño}!`,
+        `Casi, ${niño}. ¡Busca la que es igualita!`,
+        `Esa no es, ${niño}. ¡Tú puedes encontrarla!`,
+        `No es esa. ¡Sigue buscando, ${niño}!`,
+      ];
+      speak(wrongPhrases[Math.floor(Math.random() * wrongPhrases.length)]);
       setTimeout(() => setStatus('idle'), 2500);
     }
   };

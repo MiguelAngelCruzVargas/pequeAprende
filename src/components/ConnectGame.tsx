@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '../lib/speech';
 import { ArrowLeft } from 'lucide-react';
+import { SHAPE_ICONS } from './shapeIcons';
 
 interface Item {
   id: string;
@@ -22,28 +23,34 @@ interface Particle {
 
 type ConnectMode = 'shapes' | 'colors' | 'animals';
 
-// Color de fondo vivo para cada figura — bg + borde + sombra
-const ITEM_COLORS: Record<string, { bg: string; border: string; shadow: string; line: string }> = {
-  circle: { bg: '#fef9c3', border: '#facc15', shadow: '#ca8a04', line: '#f59e0b' },
-  square: { bg: '#fee2e2', border: '#f87171', shadow: '#7f1d1d', line: '#ef4444' },
-  triangle: { bg: '#d1fae5', border: '#34d399', shadow: '#064e3b', line: '#10b981' },
-  rectangle: { bg: '#ffedd5', border: '#fb923c', shadow: '#9a3412', line: '#f97316' },
-  heart: { bg: '#fce7f3', border: '#f472b6', shadow: '#9d174d', line: '#ec4899' },
-  star: { bg: '#fefce8', border: '#facc15', shadow: '#a16207', line: '#eab308' },
-  oval: { bg: '#f3e8ff', border: '#a855f7', shadow: '#581c87', line: '#7e22ce' },
-  rhombus: { bg: '#ecfeff', border: '#22d3ee', shadow: '#164e63', line: '#0891b2' },
-  dog: { bg: '#fff7ed', border: '#fb923c', shadow: '#c2410c', line: '#f97316' },
-  cat: { bg: '#fef3c7', border: '#fbbf24', shadow: '#b45309', line: '#f59e0b' },
-  fish: { bg: '#e0f2fe', border: '#38bdf8', shadow: '#0369a1', line: '#0ea5e9' },
-  bird: { bg: '#dcfce7', border: '#4ade80', shadow: '#15803d', line: '#22c55e' },
-  rabbit: { bg: '#fdf2f8', border: '#f472b6', shadow: '#be185d', line: '#ec4899' },
-  turtle: { bg: '#ecfdf5', border: '#34d399', shadow: '#065f46', line: '#10b981' },
-  lion: { bg: '#fef9c3', border: '#facc15', shadow: '#ca8a04', line: '#eab308' },
-  monkey: { bg: '#fee2e2', border: '#f87171', shadow: '#b91c1c', line: '#ef4444' },
+// Color vivo por figura/animal — MISMOS tonos que ShapesGame/AnimalsGame
+// para que una figura se vea igual en todos los juegos. Antes eran tintes
+// pálidos (bg #fef9c3 etc.) con un ícono blanco encima, que se veía lavado
+// y costaba distinguir rápido — ahora es el mismo bloque sólido de siempre.
+const ITEM_COLORS: Record<string, { bg: string; shadow: string; line: string }> = {
+  circle: { bg: '#3b82f6', shadow: '#1e3a8a', line: '#3b82f6' },
+  square: { bg: '#ef4444', shadow: '#7f1d1d', line: '#ef4444' },
+  triangle: { bg: '#10b981', shadow: '#064e3b', line: '#10b981' },
+  rectangle: { bg: '#f97316', shadow: '#9a3412', line: '#f97316' },
+  heart: { bg: '#ec4899', shadow: '#9d174d', line: '#ec4899' },
+  star: { bg: '#facc15', shadow: '#a16207', line: '#eab308' },
+  oval: { bg: '#a855f7', shadow: '#581c87', line: '#a855f7' },
+  rhombus: { bg: '#06b6d4', shadow: '#164e63', line: '#06b6d4' },
+  dog: { bg: '#f97316', shadow: '#9a3412', line: '#f97316' },
+  cat: { bg: '#3b82f6', shadow: '#1e3a8a', line: '#3b82f6' },
+  fish: { bg: '#06b6d4', shadow: '#164e63', line: '#06b6d4' },
+  bird: { bg: '#10b981', shadow: '#064e3b', line: '#10b981' },
+  rabbit: { bg: '#ec4899', shadow: '#9d174d', line: '#ec4899' },
+  turtle: { bg: '#14b8a6', shadow: '#115e59', line: '#14b8a6' },
+  lion: { bg: '#ef4444', shadow: '#7f1d1d', line: '#ef4444' },
+  monkey: { bg: '#f59e0b', shadow: '#92400e', line: '#f59e0b' },
 };
 
-// Color default si no hay coincidencia
-const DEFAULT_ITEM_COLOR = { bg: '#f3f4f6', border: '#9ca3af', shadow: '#374151', line: '#6b7280' };
+// Para el modo Colores: la tarjeta queda neutra (crema, como el resto de
+// la app) y el color a emparejar vive en el círculo de adentro — si la
+// tarjeta también fuera de ese color, el reto de "encuentra el mismo
+// color" perdería sentido.
+const DEFAULT_ITEM_COLOR = { bg: '#FFFDF7', shadow: '#E3D5B4', line: '#94a3b8' };
 
 const getItemColor = (value: string) => ITEM_COLORS[value] ?? DEFAULT_ITEM_COLOR;
 
@@ -431,10 +438,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
 
   return (
     <div
-      className={`h-[100dvh] flex flex-col w-full overflow-hidden font-sans select-none transition-all duration-300 ${wrongFlash
-          ? 'bg-gradient-to-b from-red-100 via-red-50 to-pink-50'
-          : 'bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50'
-        } touch-none`}
+      className={`h-[100dvh] flex flex-col w-full overflow-hidden font-sans select-none transition-all duration-300 play-mat-bg touch-none ${wrongFlash ? 'ring-[12px] ring-inset ring-red-300/60' : ''}`}
       style={{ touchAction: 'none' }}
     >
       {/* HEADER */}
@@ -628,6 +632,8 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
               const isConnected = !!connections[item.id];
               const isFlashing = correctFlash === item.id;
               const c = getItemColor(item.value);
+              const ShapeIcon = SHAPE_ICONS[item.value];
+              const labelColor = item.type === 'color' ? 'text-slate-700' : 'text-white';
               return (
                 <motion.div
                   key={item.id}
@@ -647,7 +653,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   whileTap={!isConnected ? { scale: 0.92 } : {}}
                   style={{
                     backgroundColor: isFlashing ? '#d1fae5' : c.bg,
-                    borderColor: isFlashing ? '#4ade80' : isConnected ? c.border : c.border,
+                    borderColor: isFlashing ? '#4ade80' : '#FFF8E9',
                     boxShadow: isFlashing
                       ? '0 0 0 6px #86efac'
                       : isConnected
@@ -658,15 +664,17 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   className={`
                     w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-[2rem] md:rounded-[2.5rem]
                     flex flex-col items-center justify-center gap-1 text-4xl sm:text-5xl md:text-6xl
-                    border-4 cursor-pointer transition-colors relative
+                    border-[6px] cursor-pointer transition-colors relative
                   `}
                 >
                   {item.type === 'color' ? (
                     <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-white/60" style={{ backgroundColor: item.value }} />
+                  ) : ShapeIcon ? (
+                    <ShapeIcon className="w-12 h-12 sm:w-16 sm:h-16 text-white drop-shadow-md" />
                   ) : (
-                    <span className="text-slate-800 leading-none">{item.icon}</span>
+                    <span className="leading-none">{item.icon}</span>
                   )}
-                  <span className="text-[11px] sm:text-sm font-black text-slate-700 leading-none">{item.label}</span>
+                  <span className={`text-[11px] sm:text-sm font-black leading-none drop-shadow-sm ${labelColor}`}>{item.label}</span>
                   {/* Checkmark cuando está conectado */}
                   {isConnected && !isFlashing && (
                     <motion.div
@@ -707,6 +715,8 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
               const matchLeftId = Object.entries(connections).find(([, rId]) => rId === item.id)?.[0];
               const isFlashing = matchLeftId ? correctFlash === matchLeftId : false;
               const c = getItemColor(item.value);
+              const ShapeIcon = SHAPE_ICONS[item.value];
+              const labelColor = item.type === 'color' ? 'text-slate-700' : 'text-white';
               return (
                 <motion.div
                   key={item.id}
@@ -725,7 +735,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   whileHover={!isConnected ? { scale: 1.1 } : {}}
                   style={{
                     backgroundColor: isFlashing ? '#d1fae5' : c.bg,
-                    borderColor: isFlashing ? '#4ade80' : c.border,
+                    borderColor: isFlashing ? '#4ade80' : '#FFF8E9',
                     boxShadow: isFlashing
                       ? '0 0 0 6px #86efac'
                       : isConnected
@@ -736,15 +746,17 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                   className={`
                     w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-[2rem] md:rounded-[2.5rem]
                     flex flex-col items-center justify-center gap-1 text-4xl sm:text-5xl md:text-6xl
-                    border-4 transition-colors relative cursor-pointer
+                    border-[6px] transition-colors relative cursor-pointer
                   `}
                 >
                   {item.type === 'color' ? (
                     <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-white/60" style={{ backgroundColor: item.value }} />
+                  ) : ShapeIcon ? (
+                    <ShapeIcon className="w-12 h-12 sm:w-16 sm:h-16 text-white drop-shadow-md" />
                   ) : (
-                    <span className="text-slate-800 leading-none">{item.displayIcon}</span>
+                    <span className="leading-none">{item.displayIcon}</span>
                   )}
-                  <span className="text-[11px] sm:text-sm font-black text-slate-700 leading-none">{item.label}</span>
+                  <span className={`text-[11px] sm:text-sm font-black leading-none drop-shadow-sm ${labelColor}`}>{item.label}</span>
                   {isConnected && !isFlashing && (
                     <motion.div
                       initial={{ scale: 0 }}
