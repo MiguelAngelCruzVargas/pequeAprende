@@ -3,33 +3,46 @@ import { motion, AnimatePresence, TargetAndTransition } from 'motion/react';
 import { speak, speakAndWait } from '../lib/speech';
 import { ArrowLeft, Sparkles, BookOpen, Star, Target, CheckCircle2, XCircle } from 'lucide-react';
 
-// Cada vocal tiene su propia animación de icono (no la misma para todas) —
-// para que "vuele" el avión, "camine pesado" el elefante, etc.
-const vowels = [
+// Cada vocal tiene su propia animación de icono (no la misma para todas),
+// pero simples a propósito: UNA propiedad dominante, pocos keyframes, un
+// solo pase de ida y vuelta. Combinar x+y+rotate a la vez con muchos pasos
+// se ve tembloroso en un glifo de emoji chiquito — mejor un movimiento
+// limpio y con resorte que se lea claro.
+type IconAnim = { target: TargetAndTransition; transition: object };
+
+const vowels: Array<{
+  letter: string; word: string; syllables: string[]; icon: string;
+  color: string; shadow: string; activeShadow: string; iconAnim: IconAnim;
+}> = [
   {
     letter: 'A', word: 'Avión', syllables: ['A', 'vión'], icon: '✈️',
     color: 'bg-red-500', shadow: 'shadow-[0_10px_0_#B91C1C]', activeShadow: 'active:shadow-[0_0px_0_#B91C1C]',
-    iconAnim: { x: [0, 20, 40, 20, 0], y: [0, -18, -30, -18, 0], rotate: [0, -8, -14, -8, 0] } as TargetAndTransition,
+    // Planea en un solo arco suave, como despegando.
+    iconAnim: { target: { x: [0, 16, 0], y: [0, -14, 0], rotate: [0, -8, 0] }, transition: { duration: 1.1, ease: 'easeInOut' } },
   },
   {
     letter: 'E', word: 'Elefante', syllables: ['E', 'le', 'fan', 'te'], icon: '🐘',
     color: 'bg-blue-500', shadow: 'shadow-[0_10px_0_#1D4ED8]', activeShadow: 'active:shadow-[0_0px_0_#1D4ED8]',
-    iconAnim: { y: [0, -10, 0, -10, 0], scale: [1, 1.06, 0.95, 1.06, 1] } as TargetAndTransition,
+    // Un solo pisotón pesado, sin jitter.
+    iconAnim: { target: { y: [0, 8, 0], scale: [1, 0.94, 1] }, transition: { duration: 0.9, ease: 'easeOut' } },
   },
   {
     letter: 'I', word: 'Iguana', syllables: ['I', 'gua', 'na'], icon: '🦎',
     color: 'bg-emerald-500', shadow: 'shadow-[0_10px_0_#047857]', activeShadow: 'active:shadow-[0_0px_0_#047857]',
-    iconAnim: { x: [0, -10, 10, -10, 0], rotate: [0, -10, 10, -10, 0] } as TargetAndTransition,
+    // Un solo coleteo lateral.
+    iconAnim: { target: { x: [0, -10, 0], rotate: [0, -6, 0] }, transition: { duration: 0.8, ease: 'easeInOut' } },
   },
   {
     letter: 'O', word: 'Oso', syllables: ['O', 'so'], icon: '🐻',
     color: 'bg-orange-500', shadow: 'shadow-[0_10px_0_#C2410C]', activeShadow: 'active:shadow-[0_0px_0_#C2410C]',
-    iconAnim: { rotate: [0, -14, 14, -14, 0], y: [0, -4, 0, -4, 0] } as TargetAndTransition,
+    // Se mece una vez, como saludando.
+    iconAnim: { target: { rotate: [0, -10, 8, 0] }, transition: { duration: 1, ease: 'easeInOut' } },
   },
   {
     letter: 'U', word: 'Uvas', syllables: ['U', 'vas'], icon: '🍇',
     color: 'bg-fuchsia-500', shadow: 'shadow-[0_10px_0_#701A75]', activeShadow: 'active:shadow-[0_0px_0_#701A75]',
-    iconAnim: { y: [0, -32, 0, -14, 0, -6, 0], scale: [1, 1.1, 0.95, 1.05, 0.98, 1.02, 1] } as TargetAndTransition,
+    // Un solo rebote con resorte.
+    iconAnim: { target: { y: [0, -18, 0], scale: [1, 1.08, 1] }, transition: { type: 'spring', stiffness: 300, damping: 12 } },
   },
 ];
 
@@ -279,11 +292,11 @@ export default function VowelsGame({ onBack, isFirstTime, onVisit }: { onBack: (
                 <div className="flex flex-col items-center gap-1 sm:gap-2 relative z-10 pb-1">
                   <motion.span
                     animate={
-                      themeAnimVowel === v.letter ? v.iconAnim :
+                      themeAnimVowel === v.letter ? v.iconAnim.target :
                       activeVowel === v.letter ? { scale: [1, 1.5, 1], y: [0, -20, 0] } : {}
                     }
                     transition={
-                      themeAnimVowel === v.letter ? { duration: 1.4, ease: 'easeInOut' } : { duration: 0.6, type: "spring" }
+                      themeAnimVowel === v.letter ? v.iconAnim.transition : { duration: 0.6, type: "spring" }
                     }
                     className="text-6xl sm:text-7xl lg:text-[6rem] leading-none drop-shadow-xl"
                   >
