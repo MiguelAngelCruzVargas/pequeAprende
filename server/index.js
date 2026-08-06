@@ -15,7 +15,10 @@ import aiRoutes from './routes/ai.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.AI_SERVER_PORT || 3001;
+// Render (y la mayoría de PaaS) asignan su propio puerto dinámico y lo pasan
+// en PORT — si el server no lo respeta, la plataforma nunca detecta que el
+// servicio arrancó. AI_SERVER_PORT sigue funcionando para uso local/manual.
+const PORT = process.env.PORT || process.env.AI_SERVER_PORT || 3001;
 
 // ─── Security & Middleware ───────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
