@@ -25,17 +25,13 @@ type ConnectMode = 'shapes' | 'colors' | 'animals';
 // Color de fondo vivo para cada figura — bg + borde + sombra
 const ITEM_COLORS: Record<string, { bg: string; border: string; shadow: string; line: string }> = {
   circle: { bg: '#fef9c3', border: '#facc15', shadow: '#ca8a04', line: '#f59e0b' },
-  capsule: { bg: '#e0e7ff', border: '#818cf8', shadow: '#3730a3', line: '#4f46e5' },
-  trapezoid: { bg: '#ffedd5', border: '#fb923c', shadow: '#9a3412', line: '#f97316' },
-  cross: { bg: '#dbeafe', border: '#60a5fa', shadow: '#1e3a8a', line: '#3b82f6' },
-  arch: { bg: '#ecfeff', border: '#22d3ee', shadow: '#164e63', line: '#0891b2' },
-  triangle: { bg: '#fee2e2', border: '#f87171', shadow: '#7f1d1d', line: '#ef4444' },
-  diamond: { bg: '#fef3c7', border: '#fbbf24', shadow: '#78350f', line: '#f59e0b' },
-  bowtie: { bg: '#f3e8ff', border: '#a855f7', shadow: '#581c87', line: '#7e22ce' },
-  moon: { bg: '#f1f5f9', border: '#94a3b8', shadow: '#334155', line: '#64748b' },
-  star4: { bg: '#fefce8', border: '#facc15', shadow: '#a16207', line: '#eab308' },
-  puzzle: { bg: '#f7fee7', border: '#a3e635', shadow: '#365314', line: '#65a30d' },
-  triangle_base: { bg: '#d1fae5', border: '#34d399', shadow: '#064e3b', line: '#10b981' },
+  square: { bg: '#fee2e2', border: '#f87171', shadow: '#7f1d1d', line: '#ef4444' },
+  triangle: { bg: '#d1fae5', border: '#34d399', shadow: '#064e3b', line: '#10b981' },
+  rectangle: { bg: '#ffedd5', border: '#fb923c', shadow: '#9a3412', line: '#f97316' },
+  heart: { bg: '#fce7f3', border: '#f472b6', shadow: '#9d174d', line: '#ec4899' },
+  star: { bg: '#fefce8', border: '#facc15', shadow: '#a16207', line: '#eab308' },
+  oval: { bg: '#f3e8ff', border: '#a855f7', shadow: '#581c87', line: '#7e22ce' },
+  rhombus: { bg: '#ecfeff', border: '#22d3ee', shadow: '#164e63', line: '#0891b2' },
   dog: { bg: '#fff7ed', border: '#fb923c', shadow: '#c2410c', line: '#f97316' },
   cat: { bg: '#fef3c7', border: '#fbbf24', shadow: '#b45309', line: '#f59e0b' },
   fish: { bg: '#e0f2fe', border: '#38bdf8', shadow: '#0369a1', line: '#0ea5e9' },
@@ -51,19 +47,18 @@ const DEFAULT_ITEM_COLOR = { bg: '#f3f4f6', border: '#9ca3af', shadow: '#374151'
 
 const getItemColor = (value: string) => ITEM_COLORS[value] ?? DEFAULT_ITEM_COLOR;
 
+// Mismas 8 formas básicas que ShapesGame — apropiadas para 2-4 años.
+// (Antes había formas raras tipo "Cápsula"/"Muesca Bloque"/"Luna Smooth"
+// que no son parte del vocabulario de formas de esa edad.)
 const SHAPES = [
-  { id: 's1', type: 'shape', value: 'capsule', label: 'Cápsula', icon: '💊' },
-  { id: 's2', type: 'shape', value: 'trapezoid', label: 'Trapecio', icon: '⏢' },
-  { id: 's3', type: 'shape', value: 'cross', label: 'Cruz', icon: '➕' },
-  { id: 's4', type: 'shape', value: 'arch', label: 'Arco', icon: '⛩️' },
-  { id: 's5', type: 'shape', value: 'triangle', label: 'Triángulo Isósceles', icon: '🔺' },
-  { id: 's6', type: 'shape', value: 'diamond', label: 'Diamante', icon: '💎' },
-  { id: 's7', type: 'shape', value: 'bowtie', label: 'Muesca Bloque', icon: '🎀' },
-  { id: 's8', type: 'shape', value: 'moon', label: 'Luna Smooth', icon: '🌙' },
-  { id: 's9', type: 'shape', value: 'star4', label: 'Estrella 4 Puntas', icon: '✦' },
-  { id: 's10', type: 'shape', value: 'circle', label: 'Círculo', icon: '⭕' },
-  { id: 's11', type: 'shape', value: 'puzzle', label: 'Puzzle Real', icon: '🧩' },
-  { id: 's12', type: 'shape', value: 'triangle_base', label: 'Triángulo Base', icon: '📐' },
+  { id: 's1', type: 'shape', value: 'circle', label: 'Círculo', icon: '⚪' },
+  { id: 's2', type: 'shape', value: 'square', label: 'Cuadrado', icon: '◼️' },
+  { id: 's3', type: 'shape', value: 'triangle', label: 'Triángulo', icon: '🔺' },
+  { id: 's4', type: 'shape', value: 'rectangle', label: 'Rectángulo', icon: '▬' },
+  { id: 's5', type: 'shape', value: 'heart', label: 'Corazón', icon: '❤️' },
+  { id: 's6', type: 'shape', value: 'star', label: 'Estrella', icon: '⭐' },
+  { id: 's7', type: 'shape', value: 'oval', label: 'Óvalo', icon: '🥚' },
+  { id: 's8', type: 'shape', value: 'rhombus', label: 'Rombo', icon: '🔶' },
 ];
 
 const COLORS = [
@@ -108,7 +103,10 @@ const MODE_HINTS: Record<ConnectMode, string> = {
   animals: 'Conecta el mismo animal.',
 };
 
-const PAIRS_PER_ROUND = 3;
+const START_PAIRS = 3;
+const MAX_PAIRS = 5; // más de 5 columnas se ve muy apretado en tablet vertical
+
+const poolForMode = (m: ConnectMode): any[] => (m === 'shapes' ? SHAPES : m === 'colors' ? COLORS : ANIMALS);
 
 const CONFETTI_COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9ff3', '#ff6348'];
 
@@ -132,6 +130,10 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [praiseText, setPraiseText] = useState('');
   const [praiseVisible, setPraiseVisible] = useState(false);
+  // Dificultad: empieza en 3 parejas y sube 1 cada ronda que termina, hasta
+  // el máximo razonable para que quepa cómodo en una tablet vertical.
+  const [pairsThisRound, setPairsThisRound] = useState(START_PAIRS);
+  const [totalStars, setTotalStars] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const leftRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -139,7 +141,8 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
   const ignoreNextClickRef = useRef(false);
 
   useEffect(() => {
-    initGame();
+    setPairsThisRound(START_PAIRS);
+    initGame(START_PAIRS);
     if (isFirstTime) {
       speak('¡Hola! Toca o arrastra para unir los iguales.');
       onVisit();
@@ -148,13 +151,9 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     }
   }, [mode]);
 
-  const initGame = () => {
-    let pool: any[] = [];
-    if (mode === 'shapes') pool = SHAPES;
-    else if (mode === 'colors') pool = COLORS;
-    else pool = ANIMALS;
-
-    const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, PAIRS_PER_ROUND);
+  const initGame = (pairs: number) => {
+    const pool = poolForMode(mode);
+    const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(pairs, pool.length));
 
     const left = selected.map(item => ({ ...item, displayIcon: item.icon || '' }))
       .sort(() => Math.random() - 0.5);
@@ -171,6 +170,15 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
     setCompleted(false);
     setParticles([]);
     setPraiseVisible(false);
+  };
+
+  // Cada ronda completada sube la dificultad (una pareja más), hasta el
+  // máximo que cabe cómodo en pantalla o el tamaño de la categoría.
+  const handlePlayAgain = () => {
+    const maxForMode = Math.min(MAX_PAIRS, poolForMode(mode).length);
+    const next = Math.min(pairsThisRound + 1, maxForMode);
+    setPairsThisRound(next);
+    initGame(next);
   };
 
   const spawnParticles = useCallback((x: number, y: number) => {
@@ -252,6 +260,7 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
 
       if (Object.keys(newConnections).length === leftItems.length) {
         setCompleted(true);
+        setTotalStars(s => s + 1);
         setTimeout(() => speak('¡Lo lograste! ¡Eres una estrella!'), 600);
       }
       return true;
@@ -454,10 +463,18 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
           ))}
         </div>
 
-        {/* Progreso */}
-        <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border-2 border-indigo-100">
-          <span className="text-lg">{connectedPairs === totalPairs && totalPairs > 0 ? '🏆' : '🎯'}</span>
-          <span className="font-black text-indigo-600 text-sm">{connectedPairs}/{totalPairs}</span>
+        {/* Estrellas totales + progreso de la ronda */}
+        <div className="flex items-center gap-2">
+          {totalStars > 0 && (
+            <div className="hidden sm:flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-full border-2 border-amber-200">
+              <span className="text-base">⭐</span>
+              <span className="font-black text-amber-600 text-sm">{totalStars}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full border-2 border-indigo-100">
+            <span className="text-lg">{connectedPairs === totalPairs && totalPairs > 0 ? '🏆' : '🎯'}</span>
+            <span className="font-black text-indigo-600 text-sm">{connectedPairs}/{totalPairs}</span>
+          </div>
         </div>
       </div>
 
@@ -771,13 +788,14 @@ export default function ConnectGame({ onBack, isFirstTime, onVisit }: {
                 >
                   ¡LO LOGRASTE!
                 </motion.h3>
-                <p className="text-indigo-400 font-bold mb-6 text-lg">¡Eres una estrella! ⭐</p>
+                <p className="text-indigo-400 font-bold mb-1 text-lg">¡Eres una estrella! ⭐</p>
+                <p className="text-amber-500 font-black mb-6 text-sm uppercase tracking-wide">⭐ {totalStars} en total</p>
                 <div className="flex gap-3">
                   <button
-                    onClick={initGame}
+                    onClick={handlePlayAgain}
                     className="flex-1 py-4 bg-indigo-500 text-white rounded-2xl font-black text-xl shadow-[0_6px_0_#4338ca] active:translate-y-1.5 active:shadow-none transition-all"
                   >
-                    🔄 ¡Otra vez!
+                    🔄 ¡Otra vez! ({Math.min(pairsThisRound + 1, Math.min(MAX_PAIRS, poolForMode(mode).length))} parejas)
                   </button>
                 </div>
                 {/* Selector rápido de modo */}

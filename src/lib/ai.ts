@@ -3,13 +3,23 @@
  * Connects to the local AI backend proxy. Never exposes API keys to the browser.
  */
 
-// El backend de IA corre en un puerto aparte (server/index.js). Si usamos
-// "localhost" fijo, cualquier dispositivo que abra la app por IP de LAN
-// (p. ej. un iPad) apuntaría al propio dispositivo y todo fallaría en
-// silencio. Derivamos el host desde la URL con la que se cargó la página.
+// El backend de IA (server/index.js) puede vivir en tres sitios distintos
+// según dónde se corra la app, así que resolvemos la URL en este orden:
+//
+// 1. VITE_AI_BASE_URL — variable de entorno fijada en el build (Render,
+//    Vercel, etc.), para cuando el frontend y el backend están en dominios
+//    completamente distintos (p. ej. https://mi-api.onrender.com/api/ai).
+//    Vite la inyecta en build time por el prefijo VITE_, no hace falta
+//    tocar vite.config.ts.
+// 2. Si no existe, asumimos que el backend está en el mismo host pero en
+//    el puerto 3001 (setup local: npm run dev + npm run server, incluido
+//    abrir la app desde un iPad por IP de LAN).
 const AI_PORT = 3001;
-export const AI_BASE =
-  typeof window !== 'undefined'
+const envAiBase = (import.meta as any).env?.VITE_AI_BASE_URL as string | undefined;
+
+export const AI_BASE = envAiBase
+  ? envAiBase.replace(/\/$/, '')
+  : typeof window !== 'undefined'
     ? `${window.location.protocol}//${window.location.hostname}:${AI_PORT}/api/ai`
     : `http://localhost:${AI_PORT}/api/ai`;
 
