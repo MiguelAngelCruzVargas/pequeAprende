@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameScreen } from './types';
 import { stopSpeaking, resumeSpeaking } from './lib/speech';
@@ -114,6 +114,11 @@ function App() {
     () => new Set(loadPersistedAppState().visitedGames),
   );
   const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
+  // El menú se desmonta/remonta cada vez que se entra a un juego y se
+  // vuelve (screen cambia), lo que antes repetía la animación de entrada
+  // escalonada de las 14 tarjetas CADA VEZ que un niño volvía al menú —
+  // eso es lo que se sentía lento. Solo la reproducimos la primera vez.
+  const hasAnimatedMenuRef = useRef(false);
 
   useEffect(() => {
     // Safety net: ensure voice is enabled when the app is opened/reloaded.
@@ -237,14 +242,21 @@ function App() {
       {screen === 'menu' && <AppHeader screen={screen} setScreen={handleSetScreen} />}
 
       <main className="relative z-10 flex-1 flex flex-col overflow-hidden">
+        {/* mode="wait" se mantiene (quitarlo encimaría dos pantallas en el
+            layout mientras cruzan) pero mucho más corto y sin slide vertical
+            — antes eran dos pasos secuenciales de 0.15s con desplazamiento,
+            ahora es un fundido simple y rápido. */}
         <AnimatePresence mode="wait">
           <motion.div
             key={screen}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.05, y: -20 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.08 }}
             className="w-full flex-1 flex flex-col min-h-0"
+            onAnimationComplete={() => {
+              if (screen === 'menu') hasAnimatedMenuRef.current = true;
+            }}
           >
             {screen === 'menu' ? (
               <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-8 md:px-12 pt-4 pb-6 custom-scrollbar relative z-10">
@@ -260,9 +272,9 @@ function App() {
 
                 <div className="max-w-[1400px] mx-auto pb-12">
                   {categories.map((cat, catIdx) => (
-                    <motion.div 
-                      key={cat.name} 
-                      initial={{ opacity: 0, y: 30 }}
+                    <motion.div
+                      key={cat.name}
+                      initial={hasAnimatedMenuRef.current ? false : { opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: catIdx * 0.1 }}
                       className="mb-10 lg:mb-16"
@@ -283,9 +295,9 @@ function App() {
                         {menuItems.filter(m => cat.name === 'Aprender con IA' ? m.category === 'Aprender' : m.category === 'Habla').map((item, i) => (
                           <motion.button
                             key={item.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={hasAnimatedMenuRef.current ? false : { opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.03, duration: 0.3 }}
+                            transition={hasAnimatedMenuRef.current ? { duration: 0 } : { delay: i * 0.03, duration: 0.3 }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleSetScreen(item.id as GameScreen)}
